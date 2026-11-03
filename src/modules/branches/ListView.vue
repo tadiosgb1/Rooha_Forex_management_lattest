@@ -97,7 +97,7 @@ onMounted(loadBranches)
       <p v-if="successMessage" class="module-description" role="status" style="padding: 12px 20px; color: #167344;">{{ successMessage }}</p>
       <div class="module-table-wrap">
         <table class="module-table">
-          <thead><tr><th>Branch code</th><th>Branch name</th><th>Location</th><th>Primary phone</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Branch code</th><th>Branch name</th><th>Location</th><th>Phone numbers</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
             <tr v-if="loading"><td colspan="6" class="module-empty-state">Loading branches…</td></tr>
             <tr v-else-if="visibleBranches.length === 0"><td colspan="6" class="module-empty-state">{{ search ? 'No branches match your search.' : 'No branches found.' }}</td></tr>
@@ -105,7 +105,12 @@ onMounted(loadBranches)
               <td>{{ branch.branch_code || '—' }}</td>
               <td>{{ branch.branch_name || '—' }}</td>
               <td>{{ branch.location || branch.address || '—' }}</td>
-              <td>{{ branch.phone_primary || branch.phone || '—' }}</td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <span>{{ branch.phone_primary || branch.phone || '—' }}</span>
+                  <span v-if="branch.phone_secondary" class="module-description">{{ branch.phone_secondary }}</span>
+                </div>
+              </td>
               <td><span class="module-status-chip" :class="String(branch.status || (branch.is_active ? 'APPROVED' : 'INACTIVE')).toLowerCase()">{{ branch.status || (branch.is_active ? 'APPROVED' : 'INACTIVE') }}</span></td>
               <td>
                 <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;">
