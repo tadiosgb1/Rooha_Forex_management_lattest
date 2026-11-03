@@ -162,7 +162,7 @@ function logout() { profileOpen.value = false; appStore.logout(); router.push('/
                 :key="item.to"
                 :to="item.to"
                 class="modular-nav-link modular-nav-sublink"
-                :class="{ active: route.path === item.to.split('?')[0] && (item.to.includes('?status=pending') ? route.query.status === 'pending' : item.to.includes('?status=active') ? route.query.status === 'active' : item.to.includes('?kyc=pending') ? route.query.kyc === 'pending' : item.to.includes('?kyc=active') ? route.query.kyc === 'active' : item.to.includes('?view=id-types') ? route.query.view === 'id-types' : (!item.to.includes('?') && ((route.path !== '/kyc' && route.path !== '/customers') || (!route.query.status && !route.query.kyc && !route.query.view)))) }"
+                :class="{ active: route.path === item.to.split('?')[0] && (item.to.includes('?status=pending') ? route.query.status === 'pending' : item.to.includes('?status=active') ? route.query.status === 'active' : !item.to.includes('?')) }"
               ><span class="modular-nav-icon">{{ item.icon }}</span><span>{{ item.label }}</span></RouterLink>
             </div>
           </section>
