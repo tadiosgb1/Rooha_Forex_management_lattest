@@ -32,7 +32,6 @@ const MODULE_PERMISSION_MAP = {
   permissions: { read: ['permissions:read'], create: ['permissions:create'], update: ['permissions:update'], delete: ['permissions:delete'] },
   branches: { read: ['branches:read'], create: ['branches:create'], update: ['branches:update'], delete: ['branches:delete'] },
   customers: { read: ['customer-profiles:read'], create: ['customer-profiles:create'], update: ['customer-profiles:update'], delete: ['customer-profiles:delete'] },
-  'reference-id-types': { read: ['reference-id-types:read'], create: ['reference-id-types:create'], update: ['reference-id-types:update'], delete: ['reference-id-types:delete'] },
   'currency-references': { read: ['reference-currencies:read'], create: ['reference-currencies:create'], update: ['reference-currencies:update'], delete: ['reference-currencies:delete'] },
   rates: { read: ['exchange-rates:read'], create: ['exchange-rates:create'], update: ['exchange-rates:update'], delete: ['exchange-rates:delete'] },
   'service-fees': { read: ['service-fees:read'], create: ['service-fees:create'], update: ['service-fees:update'], delete: ['service-fees:delete'] },
