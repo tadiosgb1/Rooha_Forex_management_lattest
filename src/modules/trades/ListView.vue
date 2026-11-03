@@ -45,14 +45,14 @@ function first(...values) {
 }
 function personName(person) {
   if (!person || typeof person !== 'object') return person
-  return first(person.full_name, person.customer_name, person.name, [person.first_name, person.last_name].filter(Boolean).join(' '), person.display_name)
+  return first(person.fullname, person.full_name, person.customer_name, person.name, [person.first_name, person.last_name].filter(Boolean).join(' '), person.display_name)
 }
 function currencyName(row) {
   const currency = row.currency && typeof row.currency === 'object' ? row.currency : {}
   return first(currency.code, currency.currency_code, row.currency_code, row.currency_name, row.currency_id, '—')
 }
 function normalize(row, index) {
-  const amount = Number(first(row.foreign_amount, row.amount, row.transaction_amount))
+  const amount = Number(first(row.fcy_amount, row.foreign_amount, row.amount, row.transaction_amount))
   const rate = Number(first(row.applied_rate, row.exchange_rate, row.rate))
   const customer = first(personName(row.customer_profile), personName(row.customer), row.customer_name, row.customer_full_name, row.customer_profile_name, '—')
   const id = first(row.id, row.forex_transaction_id, row.transaction_id, row.uuid, `transaction-${index}`)
