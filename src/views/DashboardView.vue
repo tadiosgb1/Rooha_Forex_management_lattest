@@ -10,11 +10,10 @@ import BaseCard from '../components/ui/BaseCard.vue'
 const store = useModulesStore()
 const router = useRouter()
 const route = useRoute()
-const summaries = [{ key: 'trades', label: 'FX trades', icon: '⇄' }, { key: 'customers', label: 'Customers', icon: '◎' }, { key: 'compliance', label: 'Compliance cases', icon: '⌁' }]
+const summaries = [{ key: 'trades', label: 'FX trades', icon: '⇄' }, { key: 'customers', label: 'Customers', icon: '◎' }]
 const visibleSummaries = computed(() => summaries.filter(item => hasModulePermission(item.key, 'read')))
 const workItems = [
   { title: 'Review pending trade', text: 'TR-1041 · EUR · Pending approval', to: '/trades', permissions: ['forex_transactions.view', 'forex_transactions.read'] },
-  { title: 'Investigate AML alert', text: 'AML-021 · Transaction pattern review', to: '/compliance', permissions: ['forex_transactions.audit.view'] },
 ]
 const visibleWorkItems = computed(() => workItems.filter(item => item.permissions.some(permission => hasModulePermissionForPermission(permission))))
 function hasModulePermissionForPermission(permission) {
@@ -26,7 +25,6 @@ const shortcuts = [
   { label: 'Inventory / FIFO', to: '/inventory', permission: 'inventory' },
   { label: 'Accounting Ledger', to: '/accounting', permission: 'accounting' },
   { label: 'Users & Roles', to: '/users', permission: 'users' },
-  { label: 'Audit Trail', to: '/audit', permission: 'audit' },
 ]
 const visibleShortcuts = computed(() => shortcuts.filter(item => hasModulePermission(item.permission, 'read')))
 </script>
