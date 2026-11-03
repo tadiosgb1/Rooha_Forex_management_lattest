@@ -22,7 +22,7 @@ function hasModulePermissionForPermission(permission) {
   return hasPermission(permission)
 }
 const shortcuts = [
-  { label: 'Rates & Board', to: '/rates', permission: 'rates' },
+  { label: 'Exchange', to: '/rates', permission: 'rates' },
   { label: 'Inventory / FIFO', to: '/inventory', permission: 'inventory' },
   { label: 'Accounting Ledger', to: '/accounting', permission: 'accounting' },
   { label: 'Users & Roles', to: '/users', permission: 'users' },
