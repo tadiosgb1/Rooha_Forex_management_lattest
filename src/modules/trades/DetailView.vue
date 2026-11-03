@@ -27,23 +27,31 @@ function first(...values) {
 }
 function personName(person) {
   if (!person || typeof person !== 'object') return person
-  return first(person.full_name, person.customer_name, person.name, [person.first_name, person.last_name].filter(Boolean).join(' '), person.display_name)
+  return first(person.fullname, person.full_name, person.customer_name, person.name, [person.first_name, person.last_name].filter(Boolean).join(' '), person.display_name)
 }
 const fields = computed(() => {
   const row = transaction.value || {}
   const currency = row.currency && typeof row.currency === 'object' ? row.currency : {}
   const customer = row.customer_profile ?? row.customer
-  const amount = Number(first(row.foreign_amount, row.amount, row.transaction_amount))
+  const amount = Number(first(row.fcy_amount, row.foreign_amount, row.amount, row.transaction_amount))
   const rate = Number(first(row.applied_rate, row.exchange_rate, row.rate))
   const equivalent = Number(first(row.etb_amount, row.local_amount, row.total_etb, Number.isFinite(amount) && Number.isFinite(rate) ? amount * rate : NaN))
   return [
     ['Transaction reference', first(row.reference, row.reference_number, row.transaction_reference, row.transaction_code, row.receipt_number, row.code)],
     ['Customer', first(personName(customer), row.customer_name, row.customer_full_name, row.customer_profile_name)],
+    ['Nationality', first(customer?.nationality)],
+    ['Phone number', first(customer?.phone_number)],
+    ['ID / passport number', first(customer?.id_or_passport_number)],
+    ['City', first(customer?.city)],
+    ['Sub-city', first(customer?.sub_city)],
+    ['Wereda', first(customer?.wereda)],
     ['Transaction type', first(row.transaction_type, row.direction, row.type)],
     ['Currency', first(currency.code, currency.currency_code, row.currency_code, row.currency_name, row.currency_id)],
     ['Foreign amount', Number.isFinite(amount) ? amount.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : first(row.foreign_amount, row.amount)],
     ['Applied rate', Number.isFinite(rate) ? rate.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : first(row.applied_rate, row.exchange_rate)],
     ['ETB equivalent', Number.isFinite(equivalent) ? equivalent.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ETB' : '—'],
+    ['Payment method', first(row.payment_method)],
+    ['Service fee', first(row.service_fee)],
     ['Status', first(row.status, row.transaction_status)],
     ['Created at', first(row.created_at, row.createdAt, row.transaction_date, row.created_date, row.date)],
     ['Till session', first(row.till_session?.name, row.till_session?.session_name, row.till_session_id)],
