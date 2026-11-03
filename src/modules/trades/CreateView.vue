@@ -215,7 +215,7 @@ async function submit() {
           <div class="module-form-field"><label for="currency">Currency</label><SearchableSelect id="currency" v-model="form.currency_id" :options="currencyOptions" placeholder="Search currency" aria-label="Currency" required /></div>
           <div class="module-form-field"><BaseInput v-model="form.fcy_amount" :label="'FCY amount (' + currencyCode() + ')'" id="fcy-amount" type="number" min="0.000001" step="any" required /></div>
           <div class="module-form-field"><BaseInput :model-value="rateValue == null ? '' : String(rateValue)" label="Rate" id="trade-rate" type="number" readonly /></div>
-          <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required><option value="CASH">CASH</option><option value="BANK_TRANSFER">BANK TRANSFER</option><option value="CARD">CARD</option></select></div>
+          <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required><option value="CASH">CASH</option></select></div>
           <div class="module-form-field"><BaseInput v-model="form.service_fee" label="Service fee" id="trade-service-fee" type="number" min="0" step="any" required /></div>
         </div>
       </section>
