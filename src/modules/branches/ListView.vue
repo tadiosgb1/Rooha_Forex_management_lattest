@@ -30,7 +30,6 @@ async function loadBranches() {
       pageSize,
       search: search.value,
       sortBy: 'created_at',
-      isActive: true,
     })
     branches.value = response.data
     totalCount.value = Number(response.count ?? response.data.length)
@@ -85,7 +84,7 @@ onMounted(loadBranches)
       <BaseButton v-if="hasPermission('branches:create')" class="module-primary-btn" @click="router.push('/branches/new')">＋ Add Branch</BaseButton>
     </div>
     <div class="module-stat-row">
-      <div class="module-stat-card"><span>Total active branches</span><strong>{{ totalCount }}</strong></div>
+      <div class="module-stat-card"><span>Total branches</span><strong>{{ totalCount }}</strong></div>
       <div class="module-stat-card"><span>Branches on this page</span><strong>{{ branches.length }}</strong></div>
       <div class="module-stat-card"><span>Page</span><strong>{{ currentPage }} / {{ totalPages }}</strong></div>
     </div>
@@ -98,16 +97,16 @@ onMounted(loadBranches)
       <p v-if="successMessage" class="module-description" role="status" style="padding: 12px 20px; color: #167344;">{{ successMessage }}</p>
       <div class="module-table-wrap">
         <table class="module-table">
-          <thead><tr><th>Branch code</th><th>Branch name</th><th>Address</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Branch code</th><th>Branch name</th><th>Location</th><th>Primary phone</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
             <tr v-if="loading"><td colspan="6" class="module-empty-state">Loading branches…</td></tr>
-            <tr v-else-if="visibleBranches.length === 0"><td colspan="6" class="module-empty-state">{{ search ? 'No branches match your search.' : 'No active branches found.' }}</td></tr>
+            <tr v-else-if="visibleBranches.length === 0"><td colspan="6" class="module-empty-state">{{ search ? 'No branches match your search.' : 'No branches found.' }}</td></tr>
             <tr v-for="branch in visibleBranches" :key="branch.id">
               <td>{{ branch.branch_code || '—' }}</td>
               <td>{{ branch.branch_name || '—' }}</td>
-              <td>{{ branch.address || '—' }}</td>
-              <td>{{ branch.phone || '—' }}</td>
-              <td><span class="module-status-chip" :class="branch.is_active ? 'active' : 'blocked'">{{ branch.is_active ? 'Active' : 'Inactive' }}</span></td>
+              <td>{{ branch.location || branch.address || '—' }}</td>
+              <td>{{ branch.phone_primary || branch.phone || '—' }}</td>
+              <td><span class="module-status-chip" :class="String(branch.status || (branch.is_active ? 'APPROVED' : 'INACTIVE')).toLowerCase()">{{ branch.status || (branch.is_active ? 'APPROVED' : 'INACTIVE') }}</span></td>
               <td>
                 <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;">
                   <BaseButton v-if="hasPermission('branches:update')" variant="secondary" size="sm" :disabled="deletingId !== null" @click="router.push(`/branches/${branch.id}/edit`)">Edit</BaseButton>
@@ -119,7 +118,7 @@ onMounted(loadBranches)
         </table>
       </div>
       <div class="module-table-footer">
-        <span>Showing {{ branches.length }} of {{ totalCount }} active branches</span>
+        <span>Showing {{ branches.length }} of {{ totalCount }} branches</span>
         <div style="display:flex;align-items:center;gap:8px;">
           <BaseButton variant="secondary" size="sm" :disabled="loading || currentPage <= 1" @click="changePage(currentPage - 1)">Previous</BaseButton>
           <span>Page {{ currentPage }} of {{ totalPages }}</span>
