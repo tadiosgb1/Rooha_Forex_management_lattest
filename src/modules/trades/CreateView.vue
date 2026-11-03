@@ -17,7 +17,9 @@ const loading = ref(false)
 const saving = ref(false)
 const loadError = ref('')
 const currencies = ref([])
-const sessions = ref([])
+const serviceFees = ref([])
+const serviceFeeLoading = ref(false)
+const serviceFeeError = ref('')
 const latestRate = ref(null)
 const rateLoading = ref(false)
 const rateError = ref('')
@@ -29,7 +31,6 @@ const form = reactive({
   city: 'Addis Ababa',
   sub_city: '',
   wereda: '',
-  till_session_id: '',
   currency_id: '',
   transaction_type: 'BUY',
   payment_method: 'CASH',
@@ -40,7 +41,7 @@ const form = reactive({
 function records(response) {
   let value = response?.data ?? response
   for (let depth = 0; depth < 4 && value && !Array.isArray(value) && typeof value === 'object'; depth += 1) {
-    const next = value.data ?? value.results ?? value.items ?? value.records ?? value.reference_currencies ?? value.exchange_rates ?? value.till_sessions
+    const next = value.data ?? value.results ?? value.items ?? value.records ?? value.reference_currencies ?? value.exchange_rates ?? value.service_fees
     if (next === undefined || next === value) break
     value = next
   }
@@ -48,17 +49,12 @@ function records(response) {
   return Array.isArray(value) ? value : []
 }
 function idOf(item) {
-  return item?.id ?? item?.currency_id ?? item?.till_session_id ?? item?.uuid ?? ''
+  return item?.id ?? item?.currency_id ?? item?.uuid ?? ''
 }
-function labelOf(item, kind) {
-  if (kind === 'currency') return [item.code, item.currency_code, item.name, item.currency_name].filter(Boolean).filter((value, index, arr) => arr.indexOf(value) === index).join(' · ') || 'Unnamed currency'
-  return [item.till_name, item.session_name, item.name, item.status, item.opened_at].filter(Boolean).join(' · ') || 'Till session'
+function labelOf(item) {
+  return [item.code, item.currency_code, item.name, item.currency_name].filter(Boolean).filter((value, index, arr) => arr.indexOf(value) === index).join(' · ') || 'Unnamed currency'
 }
-function options(items, kind) {
-  return items.map(item => ({ value: String(idOf(item)), label: labelOf(item, kind) })).filter(item => item.value)
-}
-const currencyOptions = computed(() => options(currencies.value, 'currency'))
-const sessionOptions = computed(() => options(sessions.value, 'session'))
+const currencyOptions = computed(() => currencies.value.map(item => ({ value: String(idOf(item)), label: labelOf(item) })).filter(item => item.value))
 const selectedCurrency = computed(() => currencies.value.find(item => String(idOf(item)) === String(form.currency_id)) ?? null)
 const buyRate = computed(() => {
   const value = Number(latestRate.value?.buy_rate ?? latestRate.value?.buyRate)
@@ -117,16 +113,27 @@ watch(() => form.transaction_type, async type => {
 onMounted(async () => {
   loading.value = true
   loadError.value = ''
+  serviceFeeLoading.value = true
+  serviceFeeError.value = ''
   try {
-    const results = await Promise.allSettled([apiRequest('reference-currencies'), apiRequest('/till-sessions')])
-    const [currencyResult, sessionResult] = results
+    const results = await Promise.allSettled([apiRequest('reference-currencies'), apiRequest('/service-fees')])
+    const [currencyResult, serviceFeeResult] = results
     if (currencyResult.status === 'fulfilled') currencies.value = records(currencyResult.value)
-    if (sessionResult.status === 'fulfilled') sessions.value = records(sessionResult.value)
-    if (results.some(result => result.status === 'rejected')) loadError.value = 'Some reference data could not be loaded. Check API connectivity and permissions, then retry.'
+    if (serviceFeeResult.status === 'fulfilled') {
+      serviceFees.value = records(serviceFeeResult.value)
+      const forexFee = serviceFees.value.find(item => item?.service_charge_type === 'FOREX_TRANSACTION')
+      const percent = Number(forexFee?.service_charge_percent)
+      if (Number.isFinite(percent) && percent >= 0) form.service_fee = String(percent)
+      else serviceFeeError.value = 'No valid FOREX_TRANSACTION service fee was returned; enter the fee manually.'
+    } else {
+      serviceFeeError.value = serviceFeeResult.reason?.message || 'Unable to fetch service fees; enter the fee manually.'
+    }
+    if (currencyResult.status === 'rejected') loadError.value = currencyResult.reason?.message || 'Unable to load currencies. Check API connectivity and permissions.'
   } catch (error) {
     loadError.value = error?.message || 'Unable to load trade reference data.'
   } finally {
     loading.value = false
+    serviceFeeLoading.value = false
   }
 })
 async function submit() {
@@ -148,7 +155,6 @@ async function submit() {
   }
   const payload = {
     customer,
-    till_session_id: form.till_session_id,
     currency_id: form.currency_id,
     transaction_type: form.transaction_type,
     rate: rateValue.value,
@@ -157,11 +163,11 @@ async function submit() {
     service_fee: Number(form.service_fee),
   }
   if (!customer.fullname || !customer.nationality || !customer.phone_number || !customer.id_or_passport_number ||
-      !payload.till_session_id || !payload.currency_id || !payload.payment_method ||
+      !payload.currency_id || !payload.payment_method ||
       !Number.isFinite(payload.rate) || payload.rate <= 0 ||
       !Number.isFinite(payload.fcy_amount) || payload.fcy_amount <= 0 ||
       !Number.isFinite(payload.service_fee) || payload.service_fee < 0) {
-    toast.error('Complete the customer, till session, currency, payment and valid amount, rate and service fee fields.')
+    toast.error('Complete the customer, currency, payment and valid amount, rate and service fee fields.')
     return
   }
   if (payload.transaction_type === 'SELL' && (!customer.city || !customer.sub_city || !customer.wereda)) {
@@ -192,7 +198,7 @@ async function submit() {
       <button type="button" class="trade-side-button trade-sell-button" :class="{ 'is-active': form.transaction_type === 'SELL' }" :aria-pressed="form.transaction_type === 'SELL'" @click="form.transaction_type = 'SELL'">SELL</button>
     </div>
     <BaseCard as="form" class="module-panel module-form-panel trading-desk-form" @submit.prevent="submit">
-      <div v-if="loading" class="trade-loading">Loading currencies and till sessions…</div>
+      <div v-if="loading" class="trade-loading">Loading currencies…</div>
       <div v-if="loadError" class="module-form-field" role="status"><p>{{ loadError }}</p><BaseButton type="button" variant="secondary" @click="router.go(0)">Reload</BaseButton></div>
       <section class="trade-form-section">
         <div class="trade-form-section-heading"><h3>Customer details</h3><p>Customer information is recorded with this trade; no existing customer profile is required.</p></div>
@@ -211,12 +217,11 @@ async function submit() {
       <section class="trade-form-section">
         <div class="trade-form-section-heading"><h3>Transaction details</h3></div>
         <div class="module-form-grid">
-          <div class="module-form-field"><label for="till-session">Till session</label><SearchableSelect id="till-session" v-model="form.till_session_id" :options="sessionOptions" placeholder="Select till session" aria-label="Till session" required /></div>
           <div class="module-form-field"><label for="currency">Currency</label><SearchableSelect id="currency" v-model="form.currency_id" :options="currencyOptions" placeholder="Search currency" aria-label="Currency" required /></div>
           <div class="module-form-field"><BaseInput v-model="form.fcy_amount" :label="'FCY amount (' + currencyCode() + ')'" id="fcy-amount" type="number" min="0.000001" step="any" required /></div>
           <div class="module-form-field"><BaseInput :model-value="rateValue == null ? '' : String(rateValue)" label="Rate" id="trade-rate" type="number" readonly /></div>
           <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required><option value="CASH">CASH</option></select></div>
-          <div class="module-form-field"><BaseInput v-model="form.service_fee" label="Service fee" id="trade-service-fee" type="number" min="0" step="any" required /></div>
+          <div class="module-form-field"><BaseInput v-model="form.service_fee" label="Service fee (%)" id="trade-service-fee" type="number" min="0" step="any" required /><p v-if="serviceFeeLoading" class="trade-rate-status">Fetching default service fee…</p><p v-else-if="serviceFeeError" class="trade-rate-error" role="status">{{ serviceFeeError }}</p><p v-else class="trade-rate-status">Defaulted from FOREX_TRANSACTION service fee; you can edit it.</p></div>
         </div>
       </section>
       <div class="trade-rate-feedback">
