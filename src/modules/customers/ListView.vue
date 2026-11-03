@@ -24,7 +24,7 @@ onMounted(loadRows)
 </script>
 <template>
 <section class="module-page customers-page">
-  <div class="customers-heading"><div><h2>Customers</h2></div><BaseButton v-if="hasPermission('customer-profiles:create')" class="customers-add-button" @click="router.push('/customers/new')"><span aria-hidden="true">＋</span> Add customer</BaseButton></div>
+  <div class="customers-heading"><div><h2>Customers</h2><p>Customer details captured during trades appear here when supported by the backend.</p></div></div>
   <div class="customers-metrics"><article class="customers-metric"><span class="metric-icon metric-icon-total">♙</span><div><p>Total customers</p><strong>{{ rows.length }}</strong></div></article><article class="customers-metric"><span class="metric-icon metric-icon-contact">☎</span><div><p>Customers with contact details</p><strong>{{ rows.filter(row=>row.phone||row.email).length }}</strong></div></article></div>
   <p v-if="errorMessage" class="customers-alert customers-alert-error" role="alert">{{ errorMessage }}</p><p v-if="successMessage" class="customers-alert customers-alert-success" role="status">{{ successMessage }}</p>
   <section class="customers-register-card"><div class="customers-register-head"><div><div class="customers-register-title"><h3>All customers</h3><span class="customers-count">{{ visibleRows.length }}</span></div><p>Search customer records and select an action to view or update a profile.</p></div><label class="customers-search"><span aria-hidden="true">⌕</span><BaseInput v-model="search" placeholder="Search name, phone, email…" aria-label="Search customers" size="sm" /><button v-if="search" type="button" aria-label="Clear search" @click="search=''">×</button></label></div>
