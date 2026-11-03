@@ -1,0 +1,13 @@
+<script setup>
+import {onMounted,reactive,ref} from 'vue'
+import {useRoute,useRouter} from 'vue-router'
+import { useToast } from '../../composables/toast'
+import BaseButton from '../../components/ui/BaseButton.vue'
+import {roleService} from '../../services/roleService'
+const route=useRoute(),router=useRouter(),toast=useToast(),isEdit=!!route.params.id,loading=ref(false),saving=ref(false),errorMessage=ref('')
+const form=reactive({name:'',description:''})
+async function load(){if(!isEdit)return;loading.value=true;try{const res=await roleService.get(route.params.id),row=res?.data||res;form.name=row.name||'';form.description=row.description||''}catch(e){errorMessage.value=e?.message||'Unable to load role.'}finally{loading.value=false}}
+async function save(){errorMessage.value='';if(!form.name.trim()||!form.description.trim()){errorMessage.value='Name and description are required.';return}saving.value=true;try{const payload={name:form.name.trim(),description:form.description.trim()};if(isEdit)await roleService.update(route.params.id,payload);else await roleService.create(payload);toast.success('Role saved successfully.');router.push('/roles')}catch(e){errorMessage.value=e?.message||'Unable to save role.'}finally{saving.value=false}}
+onMounted(load)
+</script>
+<template><section class="module-page"><div class="module-page-intro"><div><h2>{{isEdit?'Edit Role':'Create Role'}}</h2><p class="module-description">Enter the role name and description.</p></div><BaseButton variant="secondary" @click="router.push('/roles')">← Back to roles</BaseButton></div><section class="module-panel module-form-panel"><div class="module-panel-header"><h3>Role information</h3></div><p v-if="loading" class="module-description" style="padding:16px 24px">Loading role…</p><form v-else @submit.prevent="save"><div class="module-form-grid"><label class="module-form-field"><span>Name *</span><input v-model="form.name" class="ui-input" placeholder="Administrator" required /></label><label class="module-form-field" style="grid-column:1/-1"><span>Description *</span><textarea v-model="form.description" rows="4" required placeholder="Describe the access and responsibilities for this role." /></label></div><p v-if="errorMessage" role="alert" style="margin:0 24px 16px;color:#b43f4a">{{errorMessage}}</p><div class="module-form-footer"><span>Role data is stored by the backend.</span><div><BaseButton type="button" variant="secondary" @click="router.push('/roles')">Cancel</BaseButton><BaseButton type="submit" :disabled="saving||loading">{{saving?'Saving…':isEdit?'Save changes':'Create role'}}</BaseButton></div></div></form></section></section></template>

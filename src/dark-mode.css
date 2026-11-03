@@ -1,0 +1,174 @@
+/* Dashboard dark theme. Scoped to the authenticated application shell so the login page stays unchanged. */
+.modular-shell.theme-dark {
+  --navy: #081522;
+  --navy2: #102337;
+  --ink: #e4edf7;
+  --muted: #9aacc0;
+  --line: #2b3b4d;
+  --bg: #0b1420;
+  --white: #111e2c;
+  --blue2: #172e4b;
+  --green2: #15382f;
+  --amber2: #3b2f1b;
+  --red2: #3b2028;
+  color-scheme: dark;
+  background: #0b1420;
+  color: #e4edf7;
+}
+.modular-shell.theme-dark .modular-main,
+.modular-shell.theme-dark .modular-content { background: #0b1420; color: #e4edf7; }
+.modular-shell.theme-dark .modular-topbar { background: #111e2c; border-color: #2b3b4d; }
+.modular-shell.theme-dark .modular-topbar h1,
+.modular-shell.theme-dark .module-page-intro h2,
+.modular-shell.theme-dark .module-stat-card strong,
+.modular-shell.theme-dark .module-panel-header h3,
+.modular-shell.theme-dark .entity-detail-item strong { color: #e4edf7; }
+.modular-shell.theme-dark .modular-breadcrumbs,
+.modular-shell.theme-dark .modular-breadcrumb-current,
+.modular-shell.theme-dark .modular-breadcrumbs a { color: #9aacc0; }
+.modular-shell.theme-dark .modular-icon-button,
+.modular-shell.theme-dark .modular-profile-trigger,
+.modular-shell.theme-dark .modular-dropdown,
+.modular-shell.theme-dark .module-stat-card,
+.modular-shell.theme-dark .module-panel,
+.modular-shell.theme-dark .entity-form-panel,
+.modular-shell.theme-dark .entity-detail-panel,
+.modular-shell.theme-dark .permission-role-card,
+.modular-shell.theme-dark .permission-user-card,
+.modular-shell.theme-dark .terms-hero,
+.modular-shell.theme-dark .term-card,
+.modular-shell.theme-dark .terms-flow-step,
+.modular-shell.theme-dark .decision-primer-grid > div,
+.modular-shell.theme-dark .decision-stage,
+.modular-shell.theme-dark .dm-config-grid > div,
+.modular-shell.theme-dark .dm-simulation > div,
+.modular-shell.theme-dark .guide-card,
+.modular-shell.theme-dark .branch-card,
+.modular-shell.theme-dark .vault-card,
+.modular-shell.theme-dark .ledger-cards > div,
+.modular-shell.theme-dark .stat-card,
+.modular-shell.theme-dark .panel,
+.modular-shell.theme-dark .trade-ticket,
+.modular-shell.theme-dark .modal,
+.modular-shell.theme-dark .login-card { background: #111e2c; border-color: #2b3b4d; color: #e4edf7; }
+.modular-shell.theme-dark .module-description,
+.modular-shell.theme-dark .module-stat-card > span,
+.modular-shell.theme-dark .module-stat-card small,
+.modular-shell.theme-dark .module-panel-header p,
+.modular-shell.theme-dark .module-table-footer,
+.modular-shell.theme-dark .entity-detail-item span,
+.modular-shell.theme-dark .permission-role-head small,
+.modular-shell.theme-dark .terms-flow-step p,
+.modular-shell.theme-dark .decision-stage p,
+.modular-shell.theme-dark .dm-config-grid span,
+.modular-shell.theme-dark .dm-result small { color: #9aacc0; }
+.modular-shell.theme-dark .module-panel-header,
+.modular-shell.theme-dark .module-table td,
+.modular-shell.theme-dark .entity-detail-item,
+.modular-shell.theme-dark .module-table-footer { border-color: #2b3b4d; }
+.modular-shell.theme-dark .module-table th,
+.modular-shell.theme-dark th { background: #172536; color: #a8b8ca; }
+.modular-shell.theme-dark .module-table td,
+.modular-shell.theme-dark td { color: #c6d3e1; border-color: #2b3b4d; }
+.modular-shell.theme-dark .module-table tbody tr:hover { background: #19293a; }
+.modular-shell.theme-dark .module-search,
+.modular-shell.theme-dark .entity-field input,
+.modular-shell.theme-dark .entity-field select,
+.modular-shell.theme-dark .entity-field textarea,
+.modular-shell.theme-dark .modular-login-card input,
+.modular-shell.theme-dark .modular-login-card select,
+.modular-shell.theme-dark input,
+.modular-shell.theme-dark select,
+.modular-shell.theme-dark textarea { background: #0b1420; color: #e4edf7; border-color: #35485d; }
+.modular-shell.theme-dark .entity-field,
+.modular-shell.theme-dark .modular-login-card .module-form-field { color: #c6d3e1; }
+.modular-shell.theme-dark .entity-secondary-btn,
+.modular-shell.theme-dark .modular-dropdown a { background: #172536; color: #d7e2ee; border-color: #35485d; }
+.modular-shell.theme-dark .module-status-chip { background: #263648; color: #c6d3e1; }
+.modular-shell.theme-dark .module-status-chip.active,
+.modular-shell.theme-dark .module-status-chip.approved,
+.modular-shell.theme-dark .module-status-chip.completed,
+.modular-shell.theme-dark .module-status-chip.verified,
+.modular-shell.theme-dark .module-status-chip.paid { background: #15382f; color: #78d8ad; }
+.modular-shell.theme-dark .module-status-chip.pending,
+.modular-shell.theme-dark .module-status-chip.review,
+.modular-shell.theme-dark .module-status-chip.in-progress { background: #3b2f1b; color: #f2c56d; }
+.modular-shell.theme-dark .module-status-chip.rejected,
+.modular-shell.theme-dark .module-status-chip.blocked,
+.modular-shell.theme-dark .module-status-chip.failed { background: #3b2028; color: #ff9da6; }
+.modular-shell.theme-dark .terms-hero p,
+.modular-shell.theme-dark .term-card p,
+.modular-shell.theme-dark .term-connect span,
+.modular-shell.theme-dark .guide-card p,
+.modular-shell.theme-dark .guide-card p strong,
+.modular-shell.theme-dark .guide-row span,
+.modular-shell.theme-dark .workflow-card,
+.modular-shell.theme-dark .role-boundary > div,
+.modular-shell.theme-dark .access-rules div { color: #c6d3e1; }
+.modular-shell.theme-dark .term-example,
+.modular-shell.theme-dark .guide-row span,
+.modular-shell.theme-dark .workflow-card,
+.modular-shell.theme-dark .role-boundary > div,
+.modular-shell.theme-dark .access-rules div,
+.modular-shell.theme-dark .branch-metrics span,
+.modular-shell.theme-dark .currency-mini span { background: #172536; border-color: #2b3b4d; }
+.modular-shell.theme-dark .modular-dropdown-user,
+.modular-shell.theme-dark .modular-notification-menu { color: #e4edf7; }
+.modular-shell.theme-dark .modular-dropdown p { color: #9aacc0; }
+.modular-shell.theme-dark .module-empty-state { color: #9aacc0 !important; }
+.modular-shell.theme-dark .buy-side { background: linear-gradient(100deg, #122a27, #13251f); }
+.modular-shell.theme-dark .sell-side { background: linear-gradient(100deg, #172536, #111e2c); }
+.modular-shell.theme-dark .ticket-header,
+.modular-shell.theme-dark .trade-side + .trade-side { border-color: #2b3b4d; }
+.modular-shell.theme-dark .queue-avatar,
+.modular-shell.theme-dark .branch-metrics span,
+.modular-shell.theme-dark .currency-mini span { color: #c6d3e1; }
+.modular-shell.theme-dark .modular-icon-button:hover,
+.modular-shell.theme-dark .modular-profile-trigger:hover { background: #1b2c3f; }
+.modular-theme-toggle { white-space: nowrap; }
+@media (max-width: 520px) {
+  .modular-theme-toggle .modular-theme-label { display: none; }
+}
+
+
+/* Shared typography tokens and readable text contrast in dark theme. */
+.modular-shell.theme-dark {
+  --app-font-family: 'DM Sans', sans-serif;
+  --app-font-size: 14px;
+  --app-text-primary: #e6edf6;
+  --app-text-secondary: #d0dbea;
+  --app-text-muted: #b4c3d5;
+  --app-heading-color: #f1f5fb;
+}
+.modular-shell.theme-dark .modular-content,
+.modular-shell.theme-dark .modular-content .module-page {
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-size);
+  color: var(--app-text-primary);
+}
+.modular-shell.theme-dark .modular-content .module-page :is(p, label, dt, dd, td, th, small, .module-description, .result-count, .pagination, .filter-grid label, .summary-card span, .record-identity p, .record-reference, .detail-tabs button, .back-link, .customer-profile-link, .state-message, .detail-state) {
+  color: var(--app-text-secondary);
+}
+.modular-shell.theme-dark .modular-content .module-page :is(h1, h2, h3, h4, .module-page-intro h2, .panel-heading h3, .module-panel-header h3, .summary-card strong, .record-identity h3) {
+  color: var(--app-heading-color);
+}
+.modular-shell.theme-dark .modular-content .module-page :is(.module-table td, .module-table td strong, .module-detail-grid dd, .entity-detail-item strong, .summary-card strong, .record-identity h3, .rate-detail-grid dd) {
+  color: #e6edf6;
+}
+.modular-shell.theme-dark .modular-content .module-page :is(input, select, textarea) {
+  color: #e6edf6;
+  font-family: var(--app-font-family);
+  font-size: 14px;
+}
+.modular-shell.theme-dark .modular-content .module-page :is(input, select, textarea)::placeholder {
+  color: #aebed1;
+  opacity: 1;
+}
+.modular-shell.theme-dark .modular-content .module-page :is(.module-table th, .kyc-table th) {
+  color: #c2d0e0;
+  font-size: 11px;
+}
+.modular-shell.theme-dark .modular-content .module-page :is(.module-table td, .kyc-table td, .module-form-field, .filter-grid label, .module-description, .state-message) {
+  font-size: 14px;
+  line-height: 1.5;
+}
