@@ -7,14 +7,10 @@ function assertSuccess(response, fallbackMessage) {
   return response
 }
 
-export async function listBranches({ page = 1, pageSize = 10, search = '', sortBy = 'created_at', isActive = true } = {}) {
-  const query = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
-    search: search.trim(),
-    sortBy,
-    is_active: String(isActive),
-  })
+export async function listBranches({ page = 1, pageSize = 10, search = '', sortBy = 'created_at', isActive = null } = {}) {
+  const params = { page: String(page), pageSize: String(pageSize), search: search.trim(), sortBy }
+  if (typeof isActive === 'boolean') params.is_active = String(isActive)
+  const query = new URLSearchParams(params)
   const response = await apiRequest(`branches?${query.toString()}`)
   if (response?.status !== 'success' || !Array.isArray(response?.data)) {
     throw new Error(response?.message || 'The server returned an unexpected branches response.')
