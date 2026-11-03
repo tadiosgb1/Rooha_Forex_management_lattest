@@ -1,9 +1,13 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { hasPermission } from '../../utils/permissions'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import { rateService } from '../../services/rateService'
 import { referenceCurrencyService } from '../../services/referenceCurrencyService'
 
+const router = useRouter()
+const hasCreatePermission = hasPermission('exchange-rates:create')
 const rates = ref([])
 const currencies = ref([])
 const currencyIdFilter = ref('')
@@ -78,7 +82,7 @@ async function load() {
     }
   } catch (error) {
     rates.value = []
-    errorMessage.value = error?.message || 'Unable to load daily exchange rates.'
+    errorMessage.value = error?.message || 'Unable to load rates.'
   } finally {
     loading.value = false
   }
@@ -91,14 +95,14 @@ onMounted(load)
   <section class="module-page">
     <div class="module-page-intro">
       <div>
-        <h2>Board Daily Exchange Rates</h2>
+        <h2>Rate</h2>
         <p class="module-description">View the latest approved buy and sell rates by currency, including each currency’s flag.</p>
       </div>
-      <BaseButton variant="secondary" @click="load" :disabled="loading">↻ Refresh</BaseButton>
+      <div class="latest-rates-header-actions"><BaseButton variant="secondary" @click="load" :disabled="loading">↻ Refresh</BaseButton><BaseButton v-if="hasCreatePermission" @click="router.push('/rates/new')">＋ Add Exchange Rate</BaseButton></div>
     </div>
     <section class="module-panel">
       <div class="module-panel-header latest-rates-filters">
-        <h3>Daily exchange rates</h3>
+        <h3>Rate</h3>
         <div class="latest-rates-filter-controls">
           <label>
             <span>Currency</span>
