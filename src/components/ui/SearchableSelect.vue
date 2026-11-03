@@ -71,7 +71,7 @@ function onBlur() {
         role="option"
         :aria-selected="String(option.value) === String(modelValue)"
         @mousedown.prevent="choose(option)"
-      >{{ option.label }}</button>
+      ><img v-if="option.imageUrl" :src="option.imageUrl" alt="" class="searchable-select-flag" loading="lazy" /><span>{{ option.label }}</span></button>
     </div>
     <div v-else-if="open && query.trim()" class="searchable-select-empty">No matching options</div>
   </div>
@@ -81,7 +81,8 @@ function onBlur() {
 .searchable-select{position:relative;width:100%}
 .searchable-select .ui-input{width:100%}
 .searchable-select-menu,.searchable-select-empty{position:absolute;z-index:30;top:calc(100% + 4px);left:0;right:0;max-height:240px;overflow-y:auto;background:var(--white,#fff);border:1px solid var(--line,#e4e9ef);border-radius:8px;box-shadow:0 8px 24px rgba(15,32,50,.14)}
-.searchable-select-option{display:block;width:100%;padding:10px 12px;text-align:left;background:transparent;color:var(--ink,#172536);border:0;cursor:pointer}
+.searchable-select-option{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;text-align:left;background:transparent;color:var(--ink,#172536);border:0;cursor:pointer}
+.searchable-select-flag{width:28px;height:20px;object-fit:cover;border:1px solid var(--line,#e4e9ef);border-radius:3px;flex:none}
 .searchable-select-option:hover,.searchable-select-option[aria-selected="true"]{background:var(--blue2,#eaf2ff)}
 .searchable-select-empty{padding:12px;color:var(--muted,#718096)}
 </style>
