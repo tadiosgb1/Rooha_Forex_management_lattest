@@ -54,8 +54,8 @@ const navGroups = [
   {
     id: 'exchange', label: 'Exchange', icon: '↕',
     items: [
-      { label: 'Manage rates', to: '/rates', icon: '↕', permission: 'exchange-rates:read' },
-      { label: 'Board Daily Exchange Rates', to: '/rates/latest', icon: '▦', permission: 'exchange-rates:read' },
+      
+      { label: 'Rate', to: '/rates/latest', icon: '▦', permission: 'exchange-rates:read' },
       { label: 'Reference Currencies', to: '/reference-currencies', icon: '¤', permission: 'reference-currencies:read' },
       { label: 'Service Fee', to: '/service-fees', icon: '%', permission: 'service-fees:read' },
     ],
