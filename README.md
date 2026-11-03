@@ -2,11 +2,11 @@
 
 A Vue 3 + Vite frontend prototype for foreign-exchange bureau operations. The codebase uses the **Composition API** in Vue single-file components, **Pinia** for shared application state, and a service layer for backend communication.
 
-> **Important:** The current screens and demo data are a prototype, not a production financial system. Authentication, authorization, KYC/AML decisions, NBE limits, rates, approvals, ledger postings, and audit evidence must be enforced and persisted by a trusted backend. Never treat client-side checks as compliance controls.
+> **Important:** The current screens and demo data are a prototype, not a production financial system. Authentication, authorization, AML decisions, NBE limits, rates, approvals, ledger postings, and audit evidence must be enforced and persisted by a trusted backend. Never treat client-side checks as compliance controls.
 
 ## Features in the demo
 - Role-oriented operations console for administrator, teller, supervisor, compliance, branch manager, and finance/audit.
-- Trading, customer/KYC, rate approval, reversals, ledger, and governance views.
+- Trading, customer profiles, rate approval, reversals, ledger, and governance views.
 - Pinia store for shared session/navigation state.
 - API service foundation with consistent JSON handling, timeout support, and normalized errors.
 - Environment configuration through Vite `VITE_*` variables.
