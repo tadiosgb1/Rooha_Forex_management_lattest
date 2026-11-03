@@ -57,7 +57,17 @@ function idOf(item) {
 function labelOf(item) {
   return [item.code, item.currency_code, item.name, item.currency_name].filter(Boolean).filter((value, index, arr) => arr.indexOf(value) === index).join(' · ') || 'Unnamed currency'
 }
-const currencyOptions = computed(() => currencies.value.map(item => ({ value: String(idOf(item)), label: labelOf(item) })).filter(item => item.value))
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://10.195.49.18:3001').replace(/\/$/, '')
+function currencyFlagUrl(item) {
+  const path = item?.flag_url ?? item?.flagUrl
+  if (!path) return ''
+  try { return new URL(path, apiBaseUrl + '/').href } catch { return '' }
+}
+const currencyOptions = computed(() => currencies.value.map(item => ({
+  value: String(idOf(item)),
+  label: labelOf(item),
+  imageUrl: currencyFlagUrl(item),
+})).filter(item => item.value))
 const countryCodes = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ')
 const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
 const countryOptions = computed(() => countryCodes
@@ -253,7 +263,12 @@ async function submit() {
           <div class="module-form-field"><label for="currency">Currency</label><SearchableSelect id="currency" v-model="form.currency_id" :options="currencyOptions" placeholder="Search currency" aria-label="Currency" required /></div>
           <div class="module-form-field"><BaseInput v-model="form.fcy_amount" :label="'FCY amount (' + currencyCode() + ')'" id="fcy-amount" type="number" min="0.000001" step="any" required /></div>
           <div class="module-form-field"><BaseInput :model-value="rateValue == null ? '' : String(rateValue)" label="Rate" id="trade-rate" type="number" readonly /></div>
-          <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required><option value="CASH">CASH</option></select></div>
+          <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required>
+              <option value="CASH">Cash</option>
+              <option value="BANK_TRANSFER">Bank transfer</option>
+              <option value="MOBILE_MONEY">Mobile money</option>
+              <option value="CARD">Card</option>
+            </select></div>
           <div class="module-form-field"><BaseInput v-model="form.service_fee" label="Service fee (%)" id="trade-service-fee" type="number" min="0" step="any" required /><p v-if="serviceFeeLoading" class="trade-rate-status">Fetching default service fee…</p><p v-else-if="serviceFeeError" class="trade-rate-error" role="status">{{ serviceFeeError }}</p><p v-else class="trade-rate-status">Defaulted from FOREX_TRANSACTION service fee; you can edit it.</p></div>
         </div>
       </section>
