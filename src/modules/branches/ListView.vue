@@ -109,6 +109,7 @@ onMounted(loadBranches)
               <td><span class="module-status-chip" :class="String(branch.status || (branch.is_active ? 'APPROVED' : 'INACTIVE')).toLowerCase()">{{ branch.status || (branch.is_active ? 'APPROVED' : 'INACTIVE') }}</span></td>
               <td>
                 <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;">
+                  <BaseButton variant="secondary" size="sm" @click="router.push(`/branches/${branch.id}`)">View</BaseButton>
                   <BaseButton v-if="hasPermission('branches:update')" variant="secondary" size="sm" :disabled="deletingId !== null" @click="router.push(`/branches/${branch.id}/edit`)">Edit</BaseButton>
                   <BaseButton v-if="hasPermission('branches:delete')" variant="danger" size="sm" :disabled="deletingId !== null" @click="removeBranch(branch)">{{ deletingId === branch.id ? 'Deleting…' : 'Delete' }}</BaseButton>
                 </div>
