@@ -6,7 +6,7 @@ A Vue 3 + Vite frontend prototype for foreign-exchange bureau operations. The co
 
 ## Features in the demo
 - Role-oriented operations console for administrator, teller, supervisor, compliance, branch manager, and finance/audit.
-- Trading, customer/KYC, rate approval, vault/till, reconciliation, reversals, ledger, and governance views.
+- Trading, customer/KYC, rate approval, reversals, ledger, and governance views.
 - Pinia store for shared session/navigation state.
 - API service foundation with consistent JSON handling, timeout support, and normalized errors.
 - Environment configuration through Vite `VITE_*` variables.
@@ -53,7 +53,7 @@ Vite exposes `VITE_*` variables to browser code. **Never put passwords, private 
 - **Production:** replace demo login and in-memory sample operations with backend-backed flows before deployment.
 
 ## Service layer
-`src/services/apiClient.js` provides a reusable fetch wrapper. Domain services should be added alongside it (for example, `trades.js`, `rates.js`, `customers.js`, `vault.js`, `reconciliation.js`, and `reports.js`) as corresponding backend endpoints become available. API paths and response schemas must match the backend contract.
+`src/services/apiClient.js` provides a reusable fetch wrapper. Domain services should be added alongside it (for example, `trades.js`, `rates.js`, `customers.js`, and `reports.js`) as corresponding backend endpoints become available. API paths and response schemas must match the backend contract.
 
 ## Suggested production checklist
 - [ ] Connect the backend and document its OpenAPI contract.

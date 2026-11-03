@@ -36,18 +36,13 @@ const MODULE_PERMISSION_MAP = {
   'reference-id-types': { read: ['reference-id-types:read'], create: ['reference-id-types:create'], update: ['reference-id-types:update'], delete: ['reference-id-types:delete'] },
   'currency-references': { read: ['reference-currencies:read'], create: ['reference-currencies:create'], update: ['reference-currencies:update'], delete: ['reference-currencies:delete'] },
   rates: { read: ['exchange-rates:read'], create: ['exchange-rates:create'], update: ['exchange-rates:update'], delete: ['exchange-rates:delete'] },
-  'cash-vaults': { read: ['cash-vaults:read'], create: ['cash-vaults:create'], update: ['cash-vaults:update'], delete: ['cash-vaults:delete'] },
-  'cash-vault-balances': { read: ['cash-vault-balances:read'], create: ['cash-vault-balances:create'], update: ['cash-vault-balances:update'], delete: ['cash-vault-balances:delete'] },
-  'till-sessions': { read: ['till-sessions:read'], create: ['till-sessions:open'], update: ['till-sessions:close', 'till-sessions:reconcile'], delete: [] },
   trades: { read: ['forex_transactions.view', 'forex_transactions.read'], create: ['forex_transactions.create', 'forex_transactions:create'], update: [], delete: [] },
   inventory: { read: ['forex_inventory.view'], create: [], update: [], delete: [] },
-  reconciliation: { read: ['till_reconciliation_variances.view'], create: ['till_sessions.reconcile', 'till-sessions:reconcile'], update: [], delete: [] },
   reversals: { read: ['forex_transactions.receipt.view', 'forex_transactions.view', 'forex_transactions.read'], create: ['forex_transactions.reverse'], update: [], delete: [] },
   accounting: { read: ['forex_journal_entries.view'], create: [], update: [], delete: [] },
   compliance: { read: ['forex_transactions.audit.view', 'kyc:read'], create: [], update: [], delete: [] },
   'decision-management': { read: ['forex_transactions.read_policy', 'forex_transactions.manage_policy'], create: ['forex_transactions.manage_policy'], update: ['forex_transactions.manage_policy'], delete: [] },
   audit: { read: ['forex_transactions.audit.view'], create: [], update: [], delete: [] },
-  vault: { read: ['vault-transfers:read'], create: ['vault-transfers:create'], update: [], delete: [] },
 }
 
 export function hasAnyPermission(permissions) {

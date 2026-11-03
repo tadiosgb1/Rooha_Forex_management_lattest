@@ -10,10 +10,9 @@ import BaseCard from '../components/ui/BaseCard.vue'
 const store = useModulesStore()
 const router = useRouter()
 const route = useRoute()
-const summaries = [{ key: 'trades', label: 'FX trades', icon: '⇄' }, { key: 'customers', label: 'Customers', icon: '◎' }, { key: 'reconciliation', label: 'Reconciliations', icon: '✓' }, { key: 'compliance', label: 'Compliance cases', icon: '⌁' }]
+const summaries = [{ key: 'trades', label: 'FX trades', icon: '⇄' }, { key: 'customers', label: 'Customers', icon: '◎' }, { key: 'compliance', label: 'Compliance cases', icon: '⌁' }]
 const visibleSummaries = computed(() => summaries.filter(item => hasModulePermission(item.key, 'read')))
 const workItems = [
-  { title: 'Review reconciliation variance', text: 'REC-018 · Teller Till 02 · ETB 500 variance', to: '/reconciliation', permissions: ['till_reconciliation_variances.view', 'till_sessions.reconcile', 'till-sessions:reconcile'] },
   { title: 'Review pending trade', text: 'TR-1041 · EUR · Pending approval', to: '/trades', permissions: ['forex_transactions.view', 'forex_transactions.read'] },
   { title: 'Investigate AML alert', text: 'AML-021 · Transaction pattern review', to: '/compliance', permissions: ['forex_transactions.audit.view', 'kyc:read'] },
 ]
@@ -24,7 +23,6 @@ function hasModulePermissionForPermission(permission) {
 }
 const shortcuts = [
   { label: 'Rates & Board', to: '/rates', permission: 'rates' },
-  { label: 'Vault & Tills', to: '/vault', permission: 'vault' },
   { label: 'Inventory / FIFO', to: '/inventory', permission: 'inventory' },
   { label: 'Accounting Ledger', to: '/accounting', permission: 'accounting' },
   { label: 'Users & Roles', to: '/users', permission: 'users' },

@@ -59,27 +59,12 @@ const navGroups = [
       { label: 'Reference Currencies', to: '/reference-currencies', icon: '¤', permission: 'reference-currencies:read' },
     ],
   },
-  {
-    id: 'vault-tills', label: 'Vault & Tills', icon: '▣',
-    items: [
-      { label: 'Cash Vaults & Teller Tills', to: '/cash-vaults', icon: '▤', permission: 'cash-vaults:read' },
-      { label: 'Till Sessions', to: '/till-sessions', icon: '◷', permission: 'till-sessions:read' },
-      { label: 'Cash Movements', to: '/vault', icon: '▣', permission: 'vault-transfers:read' },
-    ],
-  },
   { id: 'trading-desk', label: 'Trading Desk', icon: '⇄', items: tradingDeskItems },
   {
     id: 'fx-inventory', label: 'FX Inventory / FIFO', icon: '◈',
     items: [
       { label: 'All Inventory Lots', to: '/inventory', icon: '◈', permission: 'forex_inventory.view' },
       { label: 'Add Inventory Lot', to: '/inventory/new', icon: '+', permission: [] },
-    ],
-  },
-  {
-    id: 'reconciliation', label: 'Reconciliation', icon: '✓',
-    items: [
-      { label: 'All Reconciliations', to: '/reconciliation', icon: '✓', permission: ['till_reconciliation_variances.view', 'till_sessions.reconcile', 'till-sessions:reconcile'] },
-      { label: 'New Reconciliation', to: '/reconciliation/new', icon: '+', permission: 'till_sessions.reconcile' },
     ],
   },
   {
