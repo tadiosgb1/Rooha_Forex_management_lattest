@@ -47,8 +47,6 @@ const navGroups = [
     id: 'customer-management', label: 'Customer Management', icon: '◎',
     items: [
       { label: 'Customers', to: '/customers', icon: '♙', permission: 'customer-profiles:read' },
-      { label: "Manage KYC's", to: '/kyc', icon: '◎', permission: 'kyc:read' },
-      { label: 'Reference ID Types', to: '/reference-id-types', icon: '▤', permission: 'reference-id-types:read' },
     ],
   },
   {
