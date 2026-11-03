@@ -14,7 +14,7 @@ const summaries = [{ key: 'trades', label: 'FX trades', icon: '⇄' }, { key: 'c
 const visibleSummaries = computed(() => summaries.filter(item => hasModulePermission(item.key, 'read')))
 const workItems = [
   { title: 'Review pending trade', text: 'TR-1041 · EUR · Pending approval', to: '/trades', permissions: ['forex_transactions.view', 'forex_transactions.read'] },
-  { title: 'Investigate AML alert', text: 'AML-021 · Transaction pattern review', to: '/compliance', permissions: ['forex_transactions.audit.view', 'kyc:read'] },
+  { title: 'Investigate AML alert', text: 'AML-021 · Transaction pattern review', to: '/compliance', permissions: ['forex_transactions.audit.view'] },
 ]
 const visibleWorkItems = computed(() => workItems.filter(item => item.permissions.some(permission => hasModulePermissionForPermission(permission))))
 function hasModulePermissionForPermission(permission) {
