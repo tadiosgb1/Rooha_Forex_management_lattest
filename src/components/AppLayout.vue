@@ -80,14 +80,6 @@ const navGroups = [
       { label: 'New Journal Entry', to: '/accounting/new', icon: '+', permission: [] },
     ],
   },
-  {
-    id: 'risk', label: 'Risk & Control', icon: '⌁',
-    items: [
-      { label: 'Compliance / AML', to: '/compliance', icon: '⌁', permission: 'forex_transactions.audit.view' },
-      { label: 'Decision Management', to: '/decision-management', icon: '◇', permission: ['forex_transactions.read_policy', 'forex_transactions.manage_policy'] },
-      { label: 'Audit Trail', to: '/audit', icon: '◌', permission: 'forex_transactions.audit.view' },
-    ],
-  },
 ]
 function canAccess(item) {
   const required = item.permission
