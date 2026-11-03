@@ -10,6 +10,7 @@ import BaseCard from '../../components/ui/BaseCard.vue'
 import BaseInput from '../../components/ui/BaseInput.vue'
 import { useToast } from '../../composables/toast'
 import { hasAnyPermission } from '../../utils/permissions'
+import 'flag-icons/css/flag-icons.min.css'
 
 const router = useRouter()
 const toast = useToast()
@@ -20,6 +21,8 @@ const currencies = ref([])
 const serviceFees = ref([])
 const serviceFeeLoading = ref(false)
 const serviceFeeError = ref('')
+const countryOpen = ref(false)
+const countrySearch = ref('')
 const latestRate = ref(null)
 const rateLoading = ref(false)
 const rateError = ref('')
@@ -55,6 +58,21 @@ function labelOf(item) {
   return [item.code, item.currency_code, item.name, item.currency_name].filter(Boolean).filter((value, index, arr) => arr.indexOf(value) === index).join(' · ') || 'Unnamed currency'
 }
 const currencyOptions = computed(() => currencies.value.map(item => ({ value: String(idOf(item)), label: labelOf(item) })).filter(item => item.value))
+const countryCodes = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ')
+const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
+const countryOptions = computed(() => countryCodes
+  .map(code => ({ code, name: countryNames.of(code) || code }))
+  .sort((a, b) => a.name.localeCompare(b.name)))
+const filteredCountries = computed(() => {
+  const query = countrySearch.value.trim().toLowerCase()
+  return query ? countryOptions.value.filter(country => country.name.toLowerCase().includes(query) || country.code.toLowerCase().includes(query)) : countryOptions.value
+})
+const selectedCountry = computed(() => countryOptions.value.find(country => country.name === form.nationality) || null)
+function chooseCountry(country) {
+  form.nationality = country.name
+  countryOpen.value = false
+  countrySearch.value = ''
+}
 const selectedCurrency = computed(() => currencies.value.find(item => String(idOf(item)) === String(form.currency_id)) ?? null)
 const buyRate = computed(() => {
   const value = Number(latestRate.value?.buy_rate ?? latestRate.value?.buyRate)
@@ -204,7 +222,22 @@ async function submit() {
         <div class="trade-form-section-heading"><h3>Customer details</h3><p>Customer information is recorded with this trade; no existing customer profile is required.</p></div>
         <div class="module-form-grid">
           <div class="module-form-field"><BaseInput v-model="form.fullname" label="Full name" id="trade-customer-fullname" autocomplete="name" required /></div>
-          <div class="module-form-field"><BaseInput v-model="form.nationality" label="Nationality" id="trade-customer-nationality" required /></div>
+          <div class="module-form-field nationality-field">
+            <label id="trade-customer-nationality-label">Nationality</label>
+            <button type="button" class="ui-input nationality-trigger" aria-labelledby="trade-customer-nationality-label" :aria-expanded="countryOpen" @click="countryOpen = !countryOpen">
+              <span v-if="selectedCountry" class="nationality-selected"><span class="fi" :class="'fi-' + selectedCountry.code.toLowerCase()" aria-hidden="true"></span>{{ selectedCountry.name }}</span>
+              <span v-else>Select nationality</span><span class="nationality-chevron">▾</span>
+            </button>
+            <div v-if="countryOpen" class="nationality-menu">
+              <input v-model="countrySearch" class="ui-input nationality-search" type="search" placeholder="Search countries…" aria-label="Search countries" autofocus />
+              <div class="nationality-options" role="listbox" aria-label="Countries">
+                <button v-for="country in filteredCountries" :key="country.code" type="button" class="nationality-option" :class="{ 'is-selected': form.nationality === country.name }" role="option" :aria-selected="form.nationality === country.name" @click="chooseCountry(country)">
+                  <span class="fi" :class="'fi-' + country.code.toLowerCase()" aria-hidden="true"></span><span>{{ country.name }}</span><small>{{ country.code }}</small>
+                </button>
+                <p v-if="!filteredCountries.length" class="nationality-empty">No matching country found.</p>
+              </div>
+            </div>
+          </div>
           <div class="module-form-field"><BaseInput v-model="form.phone_number" label="Phone number" id="trade-customer-phone" type="tel" autocomplete="tel" required /></div>
           <div class="module-form-field"><BaseInput v-model="form.id_or_passport_number" label="ID or passport number" id="trade-customer-id" required /></div>
           <template v-if="form.transaction_type === 'SELL'">
@@ -242,7 +275,7 @@ async function submit() {
   </section>
 </template>
 <style scoped>
-.trading-desk-heading{align-items:center;margin-bottom:16px}.trading-desk-heading h2{margin:0}.trade-form-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}
+.nationality-field{position:relative}.nationality-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;cursor:pointer}.nationality-selected{display:flex;align-items:center;gap:10px}.nationality-selected .fi,.nationality-option .fi{width:1.35rem;height:1rem;flex:none;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}.nationality-chevron{color:var(--text-muted,#778196)}.nationality-menu{position:absolute;z-index:30;top:calc(100% + 5px);left:0;right:0;padding:8px;background:var(--surface-color,#fff);border:1px solid var(--border-color,#d9e0ea);border-radius:10px;box-shadow:0 12px 30px rgba(20,30,50,.16)}.nationality-search{width:100%;margin-bottom:7px}.nationality-options{max-height:260px;overflow-y:auto}.nationality-option{display:flex;align-items:center;gap:10px;width:100%;padding:9px 8px;border:0;border-radius:6px;background:transparent;color:var(--text-primary,#263449);text-align:left;cursor:pointer}.nationality-option:hover,.nationality-option.is-selected{background:var(--surface-subtle,#f1f5f9)}.nationality-option small{margin-left:auto;color:var(--text-muted,#778196)}.nationality-empty{padding:10px;color:var(--text-muted,#778196);font-size:.85rem}.trading-desk-heading{align-items:center;margin-bottom:16px}.trading-desk-heading h2{margin:0}.trade-form-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}
 .trade-side-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}.trade-side-button{min-height:48px;border:1px solid var(--border-color,#d9e0ea);border-radius:10px;background:var(--surface-color,#fff);font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,border-color .15s,color .15s}.trade-buy-button.is-active{background:#e8f7ee;border-color:#218653;color:#17663f}.trade-sell-button.is-active{background:#fff0ef;border-color:#c83b36;color:#a52c28}
 .trading-desk-form{padding-top:20px}.trade-loading,.trade-rate-status{color:var(--text-muted,#778196);font-size:.85rem}.trade-form-section{padding:0 24px 22px;margin-bottom:22px;border-bottom:1px solid var(--border-color,#e5e9ef)}.trade-form-section-heading{margin-bottom:15px}.trade-form-section-heading h3{margin:0;font-size:1rem}.trade-form-section-heading p{margin:5px 0 0;color:var(--text-muted,#778196);font-size:.82rem}.trade-rate-badges{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px}.trade-rate-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border-color,#dfe5ed);border-radius:8px;background:var(--surface-subtle,#f8fafc);color:var(--text-primary,#263449)}.trade-rate-badge span{font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--text-muted,#778196)}.trade-rate-badge strong{font-size:.88rem;font-variant-numeric:tabular-nums}.trade-rate-badge-active-buy{background:#e8f7ee;border-color:#218653;color:#17663f}.trade-rate-badge-active-sell{background:#fff0ef;border-color:#c83b36;color:#a52c28}.trade-rate-date{font-size:.78rem;color:var(--text-muted,#778196)}.trade-rate-feedback{margin:0 24px 20px}.trade-rate-error{color:#b4232f;margin:0 0 12px}.trade-etb-calculation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px;border:1px solid var(--border-color,#e3e8f0);border-radius:12px;background:var(--surface-subtle,#f8fafc)}.trade-calculation-line{display:flex;flex-direction:column;gap:6px;min-width:0}.trade-calculation-line span{color:var(--text-muted,#778196);font-size:.78rem}.trade-calculation-line strong{color:var(--text-primary,#263449);font-size:.95rem;overflow-wrap:anywhere}.trade-calculation-line .trade-etb-total{font-size:1.15rem;color:var(--color-primary,#2357a5)}
 @media(max-width:640px){.trade-form-section{padding-left:16px;padding-right:16px}.trade-etb-calculation{grid-template-columns:1fr}.trade-rate-badges{align-items:flex-start}}
