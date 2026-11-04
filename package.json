@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "flag-icons": "^7.6.0",
     "pinia": "^2.3.1",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "flag-icons": "^7.5.0"
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",
