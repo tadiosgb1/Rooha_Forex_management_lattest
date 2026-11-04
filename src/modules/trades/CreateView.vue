@@ -204,9 +204,16 @@ async function submit() {
   }
   saving.value = true
   try {
-    await forexTransactionService.create(payload)
-    toast.success('Forex transaction recorded successfully.')
-    router.push('/trades')
+    const response = await forexTransactionService.create(payload)
+    const record = response?.data?.transaction ?? response?.data?.forex_transaction ?? response?.data?.record ?? response?.data ?? response?.transaction ?? response?.forex_transaction ?? response?.record ?? response
+    const transactionId = record?.id ?? record?.forex_transaction_id ?? record?.transaction_id ?? record?.uuid
+    toast.success('Forex transaction recorded successfully. Your receipt is ready.')
+    if (transactionId != null && String(transactionId).trim()) {
+      router.push({ name: 'trades-receipt', params: { id: String(transactionId) } })
+    } else {
+      toast.error('The transaction was saved, but the API did not return an ID. Open the transaction register to print its receipt.')
+      router.push('/trades')
+    }
   } catch (error) {
     toast.error(error?.message || 'Unable to record forex transaction.')
   } finally {

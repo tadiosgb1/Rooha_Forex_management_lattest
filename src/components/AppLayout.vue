@@ -38,13 +38,12 @@ const administrationItems = [
 ]
 const tradingDeskItems = [
   { label: 'All Trades', to: '/trades', icon: '⇄', permission: ['forex_transactions.view', 'forex_transactions.read'] },
-  { label: 'Create Trade', to: '/trades/new', icon: '+', permission: ['forex_transactions.create', 'forex_transactions:create'] },
 ]
 const navGroups = [
   { id: 'dashboard', label: 'Dashboard', standalone: true, items: [{ label: 'Dashboard', to: '/', icon: '⌂' }] },
   { id: 'administration', label: 'Administration', icon: '⚙', items: administrationItems },
   {
-    id: 'customer-management', label: 'Customer Management', icon: '◎',
+    id: 'customer-management', label: 'Customers', standalone: true,
     items: [
       { label: 'Customers', to: '/customers', icon: '♙', permission: 'customer-profiles:read' },
     ],
@@ -58,7 +57,7 @@ const navGroups = [
       { label: 'Service Fee', to: '/service-fees', icon: '%', permission: 'service-fees:read' },
     ],
   },
-  { id: 'trading-desk', label: 'Trading Desk', icon: '⇄', items: tradingDeskItems },
+  { id: 'receipt-generator', label: 'Receipt Generator', icon: '▤', items: tradingDeskItems },
   {
     id: 'fx-inventory', label: 'FX Inventory / FIFO', icon: '◈',
     items: [
@@ -87,8 +86,8 @@ function canAccess(item) {
   return (Array.isArray(required) ? required : [required]).some(hasPermission)
 }
 const visibleNavGroups = computed(() => navGroups
-  .map((group) => group.standalone ? group : ({ ...group, items: group.items.filter(canAccess) }))
-  .filter((group) => group.standalone || group.items.length > 0))
+  .map((group) => ({ ...group, items: group.items.filter(canAccess) }))
+  .filter((group) => group.items.length > 0))
 const navItems = navGroups.flatMap((group) => group.items)
 const openNavGroups = ref(new Set())
 watch(() => route.path, (path) => {
