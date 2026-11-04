@@ -108,7 +108,7 @@ onMounted(loadTransactions)
 <template>
   <section class="module-page">
     <div class="module-page-intro">
-      <div><h2>Trading Desk</h2><p class="trades-subtitle">Forex transactions from the live system.</p></div>
+      <div><h2>Receipt Generator</h2><p class="trades-subtitle">View completed forex transactions and generate printable, QR-coded receipts.</p></div>
       <div class="trades-heading-actions">
         <BaseButton variant="secondary" :disabled="loading" @click="loadTransactions">{{ loading ? 'Refreshing…' : 'Refresh' }}</BaseButton>
         <BaseButton v-if="canCreate" class="module-primary-btn" @click="router.push('/trades/new')"><span>＋</span> New transaction</BaseButton>
@@ -142,7 +142,7 @@ onMounted(loadTransactions)
           <span v-else-if="column.key === 'created'">{{ formatDate(value) }}</span>
           <span v-else>{{ value ?? '—' }}</span>
         </template>
-        <template #actions="{ row }"><BaseButton variant="ghost" size="sm" @click="router.push(`/trades/${encodeURIComponent(row.id)}`)">View</BaseButton></template>
+        <template #actions="{ row }"><div class="trade-row-actions"><BaseButton variant="ghost" size="sm" @click="router.push(`/trades/${encodeURIComponent(row.id)}`)">Details</BaseButton><BaseButton variant="secondary" size="sm" @click="router.push(`/trades/${encodeURIComponent(row.id)}/receipt`)">Receipt</BaseButton></div></template>
       </BaseTable>
       <div v-if="!loading && !error && transactions.length" class="module-table-footer">Showing {{ rows.length }} of {{ transactions.length }} API transactions</div>
     </BaseCard>
@@ -151,6 +151,7 @@ onMounted(loadTransactions)
 
 <style scoped>
 .trades-subtitle { margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem; }
+.trade-row-actions { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
 .trades-heading-actions { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
 .trades-state { padding:24px;color:var(--text-muted,#778196);text-align:center; }
 .trades-error { display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;color:#a52c28;background:#fff0ef;border-radius:8px;margin:12px 0; }
