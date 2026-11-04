@@ -86,8 +86,8 @@ function canAccess(item) {
   return (Array.isArray(required) ? required : [required]).some(hasPermission)
 }
 const visibleNavGroups = computed(() => navGroups
-  .map((group) => group.standalone ? group : ({ ...group, items: group.items.filter(canAccess) }))
-  .filter((group) => group.standalone || group.items.length > 0))
+  .map((group) => ({ ...group, items: group.items.filter(canAccess) }))
+  .filter((group) => group.items.length > 0))
 const navItems = navGroups.flatMap((group) => group.items)
 const openNavGroups = ref(new Set())
 watch(() => route.path, (path) => {
