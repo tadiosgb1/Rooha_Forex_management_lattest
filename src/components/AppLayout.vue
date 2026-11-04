@@ -58,7 +58,7 @@ const navGroups = [
       { label: 'Service Fee', to: '/service-fees', icon: '%', permission: 'service-fees:read' },
     ],
   },
-  { id: 'trading-desk', label: 'Trading Desk', icon: '⇄', items: tradingDeskItems },
+  { id: 'receipt-generator', label: 'Receipt Generator', icon: '▤', items: tradingDeskItems },
   {
     id: 'fx-inventory', label: 'FX Inventory / FIFO', icon: '◈',
     items: [
