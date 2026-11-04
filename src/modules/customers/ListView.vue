@@ -1,4 +1,5 @@
 <script setup>
+import { hasPermission } from '../../utils/permissions'
 import { computed, onMounted, ref } from 'vue'
 import { confirmAction } from '../../composables/confirmAction'
 import { useRouter } from 'vue-router'
