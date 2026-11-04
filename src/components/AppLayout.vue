@@ -38,13 +38,12 @@ const administrationItems = [
 ]
 const tradingDeskItems = [
   { label: 'All Trades', to: '/trades', icon: '⇄', permission: ['forex_transactions.view', 'forex_transactions.read'] },
-  { label: 'Create Trade', to: '/trades/new', icon: '+', permission: ['forex_transactions.create', 'forex_transactions:create'] },
 ]
 const navGroups = [
   { id: 'dashboard', label: 'Dashboard', standalone: true, items: [{ label: 'Dashboard', to: '/', icon: '⌂' }] },
   { id: 'administration', label: 'Administration', icon: '⚙', items: administrationItems },
   {
-    id: 'customer-management', label: 'Customer Management', icon: '◎',
+    id: 'customer-management', label: 'Customers', standalone: true,
     items: [
       { label: 'Customers', to: '/customers', icon: '♙', permission: 'customer-profiles:read' },
     ],
