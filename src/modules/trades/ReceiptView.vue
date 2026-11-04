@@ -71,6 +71,7 @@ async function makeQr() {
     qrCode.value = ''
   }
 }
+function printReceipt() { window.print() }
 async function load() {
   loading.value = true
   error.value = ''
@@ -98,7 +99,7 @@ onMounted(load)
       <div><h2>Transaction receipt</h2><p class="receipt-subtitle">Official transaction details and QR reference.</p></div>
       <div class="receipt-actions">
         <BaseButton variant="secondary" @click="router.push('/trades')">← Back to register</BaseButton>
-        <BaseButton :disabled="!transaction" @click="window.print()">Print receipt</BaseButton>
+        <BaseButton :disabled="!transaction" @click="printReceipt">Print receipt</BaseButton>
       </div>
     </div>
     <BaseCard class="receipt-card">
