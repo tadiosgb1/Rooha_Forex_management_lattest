@@ -22,7 +22,6 @@ const serviceFeeLoading = ref(false)
 const serviceFeeError = ref('')
 const countryOpen = ref(false)
 const countrySearch = ref('')
-const rateLoading = ref(false)
 const rateError = ref('')
 const form = reactive({
   fullname: '',
@@ -98,7 +97,7 @@ function currencyCode() {
 }
 function validateSelectedRate() {
   if (!selectedRate.value) {
-    rateError.value = 'Select an approved exchange rate before continuing.'
+    rateError.value = ''
     return false
   }
   const rate = form.transaction_type === 'BUY' ? buyRate.value : sellRate.value
@@ -259,7 +258,6 @@ async function submit() {
         </div>
       </section>
       <div class="trade-rate-feedback">
-        <p v-if="rateLoading" class="trade-rate-status">Updating rate…</p>
         <p v-if="rateError" class="trade-rate-error" role="alert">{{ rateError }}</p>
         <div v-if="selectedRate" class="trade-rate-badges" aria-live="polite">
           <span class="trade-rate-badge" :class="{ 'trade-rate-badge-active-buy': form.transaction_type === 'BUY' }"><span>BUY RATE</span><strong>{{ buyRate == null ? '—' : formatMoney(buyRate) + ' ETB' }}</strong></span>
@@ -271,7 +269,7 @@ async function submit() {
           <div class="trade-calculation-line"><span>ETB equivalent</span><strong class="trade-etb-total">{{ etbAmount == null ? '—' : formatMoney(etbAmount) + ' ETB' }}</strong></div>
         </div>
       </div>
-      <div class="module-form-footer"><span></span><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || rateLoading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
+      <div class="module-form-footer"><span></span><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
     </BaseCard>
   </section>
 </template>
