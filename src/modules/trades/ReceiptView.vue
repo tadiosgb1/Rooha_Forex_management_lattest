@@ -230,6 +230,26 @@ onMounted(load)
   .voucher-table th,.voucher-table td{padding:4px 4px!important;border:1px solid #64748b!important;overflow-wrap:anywhere!important}
   .voucher-table th{background:#e9edf2!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .voucher-table tfoot td{background:#f1f4f7!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .voucher-qr img{width:56px!important;height:56px!important}
+  .voucher-header{padding-bottom:4px!important;gap:6px!important;border-bottom-width:1px!important}
+  .voucher-brand h1{font-size:15px!important;line-height:1.15!important}
+  .voucher-brand p{margin:1px 0!important;font-size:9px!important;line-height:1.1!important}
+  .voucher-brand h2{margin:3px 0 0!important;font-size:11px!important;line-height:1.15!important}
+  .voucher-meta{gap:4px!important;padding:3px 0!important}
+  .voucher-meta div,.voucher-parties div{gap:1px!important}
+  .voucher-meta span,.voucher-parties span{font-size:8px!important;line-height:1.1!important}
+  .voucher-meta strong,.voucher-parties strong{font-size:9px!important;line-height:1.15!important}
+  .voucher-table{font-size:9px!important;line-height:1.1!important}
+  .voucher-table th{font-size:8px!important}
+  .voucher-table th,.voucher-table td{padding:2px 3px!important;line-height:1.1!important}
+  .voucher-words{margin:3px 0!important;padding:3px!important;font-size:9px!important;line-height:1.15!important}
+  .voucher-parties{gap:4px!important;padding:3px 0!important}
+  .voucher-signatures{gap:14px!important;margin:3px 0!important}
+  .voucher-signatures div{gap:7px!important;font-size:8px!important;line-height:1.1!important}
+  .voucher-legal{padding-top:3px!important;font-size:7px!important;line-height:1.2!important}
+  .voucher-legal p{margin:1px 0!important}
+  .voucher-bottom{margin-top:2px!important}
+  .voucher-bottom>small,.voucher-qr small{font-size:7px!important}
+  .voucher-qr{gap:1px!important}
+  .voucher-qr img{width:34px!important;height:34px!important}
 }
 </style>
