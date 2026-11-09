@@ -13,6 +13,7 @@ const error = ref('')
 const transaction = ref(null)
 const qrCode = ref('')
 const id = computed(() => String(route.params.id || ''))
+const isPreview = computed(() => route.query.preview === '1')
 
 function unwrap(response) {
   let value = response
@@ -114,6 +115,21 @@ async function makeQr() {
 }
 function printReceipt() { window.print() }
 async function load() {
+  if (isPreview.value) {
+    loading.value = false
+    error.value = ''
+    transaction.value = null
+    qrCode.value = ''
+    try {
+      const saved = window.sessionStorage.getItem('rooha-forex-receipt-preview')
+      transaction.value = saved ? JSON.parse(saved) : null
+      if (!transaction.value) error.value = 'No local preview data found. Return to the trade form and choose Preview receipt.'
+      else await makeQr()
+    } catch (err) {
+      error.value = err?.message || 'Unable to read local preview data.'
+    }
+    return
+  }
   loading.value = true
   error.value = ''
   transaction.value = null
@@ -130,14 +146,14 @@ async function load() {
     loading.value = false
   }
 }
-watch(id, load)
+watch([id, isPreview], load)
 onMounted(load)
 </script>
 
 <template>
   <section class="module-page receipt-page">
     <div class="module-page-intro receipt-heading no-print">
-      <div><h2>Transaction receipt</h2><p class="receipt-subtitle">FC purchase / sales voucher — Original and Customer Copy.</p></div>
+      <div><h2>Transaction receipt</h2><p class="receipt-subtitle">FC purchase / sales voucher — Original and Customer Copy.</p><p v-if="isPreview" class="receipt-preview-notice">TEST PREVIEW — Local form data only. This is not a saved or backend-confirmed transaction.</p></div>
       <div class="receipt-actions">
         <BaseButton variant="secondary" @click="router.push('/trades')">← Back to register</BaseButton>
         <BaseButton variant="secondary" :disabled="!transaction" @click="printReceipt">Download PDF</BaseButton>
@@ -157,7 +173,7 @@ onMounted(load)
               <p>Regulated by National Bank of Ethiopia</p>
               <h2>{{ details.title }} [{{ details.payment }}]</h2>
             </div>
-            <strong class="copy-label">{{ copy }}</strong>
+            <strong class="copy-label">{{ copy }}<span v-if="isPreview"> · TEST</span></strong>
           </header>
           <div class="voucher-meta">
             <div><span>Ref No</span><strong>{{ details.reference }}</strong></div>
@@ -200,7 +216,7 @@ onMounted(load)
 </template>
 
 <style scoped>
-.receipt-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}.receipt-actions{display:flex;gap:10px;flex-wrap:wrap}.receipt-card{padding:24px}.receipt-copies{max-width:1000px;margin:0 auto;color:#17212f}.voucher-copy{position:relative;padding:24px 28px 20px;border:1px solid #aeb8c5;background:#fff;page-break-inside:avoid}.voucher-copy+.voucher-copy{margin-top:22px}.voucher-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:14px;border-bottom:2px solid #243247}.voucher-brand{text-align:center;flex:1}.voucher-brand h1{margin:0;font-size:1.35rem;letter-spacing:.06em}.voucher-brand p{margin:4px 0;font-size:.78rem}.voucher-brand h2{margin:9px 0 0;font-size:1rem}.copy-label{padding:6px 9px;border:1px solid #475569;border-radius:3px;font-size:.78rem}.voucher-meta{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:14px;padding:15px 0}.voucher-meta div,.voucher-parties div{display:flex;flex-direction:column;gap:4px;min-width:0}.voucher-meta span,.voucher-parties span{font-size:.72rem;color:#526174}.voucher-meta strong,.voucher-parties strong{font-size:.82rem;overflow-wrap:anywhere}.voucher-table{width:100%;border-collapse:collapse;font-size:.76rem}.voucher-table th,.voucher-table td{padding:9px 7px;border:1px solid #9aa6b5;text-align:left}.voucher-table th{background:#eef2f6;font-size:.67rem}.voucher-table td:nth-child(1),.voucher-table td:nth-child(4),.voucher-table td:nth-child(5),.voucher-table td:nth-child(6){font-variant-numeric:tabular-nums}.voucher-table tfoot td{font-weight:800;background:#f5f7f9}.voucher-table tfoot td:last-child{text-align:right}.voucher-words{margin:14px 0;padding:10px;border:1px solid #cbd5e1;font-size:.78rem}.voucher-parties{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;padding:12px 0}.voucher-signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:12px 0}.voucher-signatures div{display:flex;flex-direction:column;gap:25px;font-size:.72rem}.voucher-signatures i{display:block;border-bottom:1px solid #475569}.voucher-legal{padding-top:9px;border-top:1px solid #cbd5e1;font-size:.67rem;line-height:1.45}.voucher-legal p{margin:4px 0}.voucher-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px}.voucher-bottom>small{color:#64748b;font-size:.62rem}.voucher-qr{display:flex;flex-direction:column;align-items:center;gap:3px}.voucher-qr img{width:82px;height:82px}.voucher-qr small{font-size:.6rem;color:#526174}.receipt-state{padding:30px;text-align:center;color:#64748b}.receipt-error{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#a52c28}
+.receipt-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}.receipt-preview-notice{margin:10px 0 0;padding:9px 12px;border:1px solid #d97706;border-radius:7px;background:#fff7ed;color:#9a3412;font-size:.82rem;font-weight:700}.receipt-actions{display:flex;gap:10px;flex-wrap:wrap}.receipt-card{padding:24px}.receipt-copies{max-width:1000px;margin:0 auto;color:#17212f}.voucher-copy{position:relative;padding:24px 28px 20px;border:1px solid #aeb8c5;background:#fff;page-break-inside:avoid}.voucher-copy+.voucher-copy{margin-top:22px}.voucher-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:14px;border-bottom:2px solid #243247}.voucher-brand{text-align:center;flex:1}.voucher-brand h1{margin:0;font-size:1.35rem;letter-spacing:.06em}.voucher-brand p{margin:4px 0;font-size:.78rem}.voucher-brand h2{margin:9px 0 0;font-size:1rem}.copy-label{padding:6px 9px;border:1px solid #475569;border-radius:3px;font-size:.78rem}.voucher-meta{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:14px;padding:15px 0}.voucher-meta div,.voucher-parties div{display:flex;flex-direction:column;gap:4px;min-width:0}.voucher-meta span,.voucher-parties span{font-size:.72rem;color:#526174}.voucher-meta strong,.voucher-parties strong{font-size:.82rem;overflow-wrap:anywhere}.voucher-table{width:100%;border-collapse:collapse;font-size:.76rem}.voucher-table th,.voucher-table td{padding:9px 7px;border:1px solid #9aa6b5;text-align:left}.voucher-table th{background:#eef2f6;font-size:.67rem}.voucher-table td:nth-child(1),.voucher-table td:nth-child(4),.voucher-table td:nth-child(5),.voucher-table td:nth-child(6){font-variant-numeric:tabular-nums}.voucher-table tfoot td{font-weight:800;background:#f5f7f9}.voucher-table tfoot td:last-child{text-align:right}.voucher-words{margin:14px 0;padding:10px;border:1px solid #cbd5e1;font-size:.78rem}.voucher-parties{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;padding:12px 0}.voucher-signatures{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:12px 0}.voucher-signatures div{display:flex;flex-direction:column;gap:25px;font-size:.72rem}.voucher-signatures i{display:block;border-bottom:1px solid #475569}.voucher-legal{padding-top:9px;border-top:1px solid #cbd5e1;font-size:.67rem;line-height:1.45}.voucher-legal p{margin:4px 0}.voucher-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px}.voucher-bottom>small{color:#64748b;font-size:.62rem}.voucher-qr{display:flex;flex-direction:column;align-items:center;gap:3px}.voucher-qr img{width:82px;height:82px}.voucher-qr small{font-size:.6rem;color:#526174}.receipt-state{padding:30px;text-align:center;color:#64748b}.receipt-error{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#a52c28}
 @media(max-width:650px){.receipt-card{padding:10px}.voucher-copy{padding:14px 10px}.voucher-brand h1{font-size:1rem}.voucher-brand h2{font-size:.8rem}.voucher-meta,.voucher-parties{grid-template-columns:1fr 1fr}.voucher-table{font-size:.62rem}.voucher-table th,.voucher-table td{padding:6px 3px}.voucher-table th{font-size:.56rem}.voucher-signatures{gap:15px}}
 @media print{@page{size:A4 portrait;margin:10mm}:global(body){background:#fff!important}.no-print{display:none!important}.receipt-page{padding:0!important}.receipt-card{border:0!important;box-shadow:none!important;padding:0!important}.receipt-copies{max-width:none}.voucher-copy{padding:12mm 10mm 8mm;border:1px solid #333;min-height:132mm;break-inside:avoid}.voucher-copy+.voucher-copy{margin-top:0;break-before:page}.voucher-table th{background:#e9edf2!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
