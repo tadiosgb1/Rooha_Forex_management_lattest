@@ -25,6 +25,9 @@ const countrySearch = ref('')
 const rateError = ref('')
 const activeTab = ref('SELL')
 const showTradeForm = ref(false)
+const currencyLines = ref([])
+const addCurrencyRateId = ref('')
+const currencyLineError = ref('')
 const form = reactive({
   fullname: '',
   nationality: 'Ethiopian',
@@ -97,8 +100,44 @@ function currencyCode() {
 function openRateForTrade(rate) {
   form.rate_id = String(rate?.id ?? '')
   form.transaction_type = activeTab.value
+  form.fcy_amount = '100'
+  currencyLines.value = [{ rate_id: form.rate_id, fcy_amount: '100' }]
+  addCurrencyRateId.value = ''
+  currencyLineError.value = ''
   showTradeForm.value = true
   validateSelectedRate()
+}
+function rateForLine(line) {
+  return exchangeRates.value.find(item => String(item?.id ?? '') === String(line.rate_id)) ?? null
+}
+function lineRateValue(rate) {
+  const value = Number(form.transaction_type === 'BUY' ? (rate?.buy_rate ?? rate?.buyRate) : (rate?.sell_rate ?? rate?.sellRate))
+  return Number.isFinite(value) && value > 0 ? value : null
+}
+const additionalRateOptions = computed(() => exchangeRates.value.filter(rate =>
+  !currencyLines.value.some(line => String(line.rate_id) === String(rate.id))
+))
+const currencyLineTotals = computed(() => currencyLines.value.map((line, index) => {
+  const rate = rateForLine(line)
+  const price = lineRateValue(rate)
+  const amount = Number(index === 0 ? form.fcy_amount : line.fcy_amount)
+  return { line, rate, price, amount, etb: price != null && Number.isFinite(amount) && amount > 0 ? amount * price : 0 }
+}))
+const totalEtbAmount = computed(() => currencyLineTotals.value.reduce((sum, line) => sum + line.etb, 0))
+function addCurrencyLine() {
+  const rate = rateForLine({ rate_id: addCurrencyRateId.value })
+  if (!rate || !lineRateValue(rate)) {
+    currencyLineError.value = 'Choose an approved currency with a valid transaction rate.'
+    return
+  }
+  currencyLines.value.push({ rate_id: String(rate.id), fcy_amount: '0' })
+  addCurrencyRateId.value = ''
+  currencyLineError.value = ''
+}
+function removeCurrencyLine(index) {
+  if (index === 0) return
+  currencyLines.value.splice(index, 1)
+  currencyLineError.value = ''
 }
 function returnToRateList() {
   showTradeForm.value = false
@@ -177,19 +216,26 @@ async function submit() {
     customer.sub_city = form.sub_city.trim()
     customer.wereda = form.wereda.trim()
   }
+  const currencies = currencyLineTotals.value.map(({ line, rate, price, amount }) => ({
+    currency_id: rate?.currency_id ?? rate?.currency?.id,
+    rate_id: rate?.id,
+    rate: price,
+    fcy_amount: amount,
+  }))
   const payload = {
     customer,
-    currency_id: selectedRate.value.currency_id ?? selectedRate.value.currency?.id,
     transaction_type: form.transaction_type,
-    rate: rateValue.value,
-    fcy_amount: Number(form.fcy_amount),
+    currencies,
+    // Keep the first-line fields for compatibility with existing single-currency API consumers.
+    currency_id: currencies[0]?.currency_id,
+    rate: currencies[0]?.rate,
+    fcy_amount: currencies[0]?.fcy_amount,
     payment_method: form.payment_method.trim().toUpperCase(),
     service_fee: Number(form.service_fee),
   }
   if (!customer.fullname || !customer.nationality || !customer.phone_number || !customer.id_or_passport_number ||
-      !payload.currency_id || !payload.payment_method ||
-      !Number.isFinite(payload.rate) || payload.rate <= 0 ||
-      !Number.isFinite(payload.fcy_amount) || payload.fcy_amount <= 0 ||
+      !payload.currencies.length || !payload.payment_method ||
+      payload.currencies.some(line => !line.currency_id || !Number.isFinite(line.rate) || line.rate <= 0 || !Number.isFinite(line.fcy_amount) || line.fcy_amount <= 0) ||
       !Number.isFinite(payload.service_fee) || payload.service_fee < 0) {
     toast.error('Complete the customer, currency, payment and valid amount, rate and service fee fields.')
     return
@@ -271,6 +317,35 @@ async function submit() {
         <button type="button" class="selected-rate-change" @click="returnToRateList">Change rate</button>
       </section>
       <section class="trade-form-section">
+        <div class="trade-form-section-heading"><h3>Currency lines</h3><p>Add one or more currencies to this transaction. Each currency uses its selected approved rate.</p></div>
+        <div class="trade-currency-lines">
+          <div v-for="(line, index) in currencyLines" :key="line.rate_id" class="trade-currency-line">
+            <div class="trade-currency-line-heading">
+              <strong>{{ rateForLine(line)?.currency?.code ?? rateForLine(line)?.currency?.currency_code ?? rateForLine(line)?.currency_code ?? 'FCY' }}</strong>
+              <span>{{ form.transaction_type }} rate: {{ lineRateValue(rateForLine(line)) == null ? '—' : formatMoney(lineRateValue(rateForLine(line))) }} ETB</span>
+              <button v-if="index > 0" type="button" class="trade-line-remove" @click="removeCurrencyLine(index)">Remove</button>
+            </div>
+            <div class="module-form-field">
+              <BaseInput v-if="index === 0" v-model="form.fcy_amount" :label="'FCY amount (' + (rateForLine(line)?.currency?.code ?? currencyCode()) + ')'" :id="'fcy-amount-' + index" type="number" min="0.000001" step="any" required />
+              <BaseInput v-else v-model="line.fcy_amount" :label="'FCY amount (' + (rateForLine(line)?.currency?.code ?? 'FCY') + ')'" :id="'fcy-amount-' + index" type="number" min="0.000001" step="any" required />
+            </div>
+            <div class="trade-currency-line-total"><span>ETB equivalent</span><strong>{{ formatMoney(currencyLineTotals[index]?.etb) }} ETB</strong></div>
+          </div>
+          <div class="trade-add-currency">
+            <label for="add-currency-rate">Add currency</label>
+            <div class="trade-add-currency-controls">
+              <select id="add-currency-rate" v-model="addCurrencyRateId" class="ui-input">
+                <option value="">Select another exchange rate</option>
+                <option v-for="rate in additionalRateOptions" :key="rate.id" :value="String(rate.id)">{{ rate.currency?.code ?? rate.currency?.currency_code ?? rate.currency_code }} — {{ rate.currency?.name ?? rate.currency?.currency_name ?? 'Currency' }}</option>
+              </select>
+              <BaseButton type="button" variant="secondary" :disabled="!addCurrencyRateId" @click="addCurrencyLine">+ Add currency</BaseButton>
+            </div>
+            <p v-if="currencyLineError" class="trade-rate-error" role="alert">{{ currencyLineError }}</p>
+          </div>
+          <div class="trade-currency-grand-total"><span>Total ETB amount</span><strong>{{ formatMoney(totalEtbAmount) }} ETB</strong></div>
+        </div>
+      </section>
+      <section class="trade-form-section">
         <div class="trade-form-section-heading"><h3>Customer details</h3></div>
         <div class="module-form-grid">
           <div class="module-form-field"><BaseInput v-model="form.fullname" label="Full name" id="trade-customer-fullname" autocomplete="name" required /></div>
@@ -302,9 +377,7 @@ async function submit() {
       <section class="trade-form-section">
         <div class="trade-form-section-heading"><h3>Transaction details</h3></div>
         <div class="module-form-grid">
-          <input type="hidden" id="exchange-rate" v-model="form.rate_id" />
-          <div class="module-form-field"><BaseInput v-model="form.fcy_amount" :label="'FCY amount (' + currencyCode() + ')'" id="fcy-amount" type="number" min="0.000001" step="any" required /></div>
-          
+
           <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required>
               <option value="CASH">Cash</option>
               <option value="BANK_TRANSFER">Bank transfer</option>
@@ -325,6 +398,7 @@ async function submit() {
 .trading-desk-form{padding-top:20px}.trade-loading,.trade-rate-status{color:var(--text-muted,#778196);font-size:.85rem}.trade-form-section{padding:0 24px 22px;margin-bottom:22px;border-bottom:1px solid var(--border-color,#e5e9ef)}.trade-form-section-heading{margin-bottom:15px}.trade-form-section-heading h3{margin:0;font-size:1rem}.trade-form-section-heading p{margin:5px 0 0;color:var(--text-muted,#778196);font-size:.82rem}.trade-rate-badges{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px}.trade-rate-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border-color,#dfe5ed);border-radius:8px;background:var(--surface-subtle,#f8fafc);color:var(--text-primary,#263449)}.trade-rate-badge span{font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--text-muted,#778196)}.trade-rate-badge strong{font-size:.88rem;font-variant-numeric:tabular-nums}.trade-rate-badge-active{background:color-mix(in srgb,var(--brand-base-color,#16A34A) 9%,var(--surface-color,#fff));border-color:var(--brand-base-color,#16A34A);color:var(--brand-base-color,#16A34A)}.trade-rate-date{font-size:.78rem;color:var(--text-muted,#778196)}.trade-rate-feedback{margin:0 24px 20px}.trade-rate-error{color:#b4232f;margin:0 0 12px}.trade-etb-calculation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px;border:1px solid var(--border-color,#e3e8f0);border-radius:12px;background:var(--surface-subtle,#f8fafc)}.trade-calculation-line{display:flex;flex-direction:column;gap:6px;min-width:0}.trade-calculation-line span{color:var(--text-muted,#778196);font-size:.78rem}.trade-calculation-line strong{color:var(--text-primary,#263449);font-size:.95rem;overflow-wrap:anywhere}.trade-calculation-line .trade-etb-total{font-size:1.15rem;color:var(--brand-base-color,#16A34A)}
 @media(max-width:1100px){.trade-rate-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.trade-rate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.trade-rate-grid{grid-template-columns:1fr}.trade-rates-panel{padding:18px 15px}.trade-currency-date{font-size:.64rem}}@media(max-width:640px){.trade-form-section{padding-left:16px;padding-right:16px}.trade-etb-calculation{grid-template-columns:1fr}.trade-rate-badges{align-items:flex-start}}
 
+.trade-currency-lines{display:flex;flex-direction:column;gap:12px}.trade-currency-line{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,260px) auto;align-items:end;gap:14px;padding:14px;border:1px solid var(--border-color,#e1e7ef);border-radius:10px}.trade-currency-line-heading{display:flex;flex-direction:column;gap:4px;min-width:0}.trade-currency-line-heading strong{color:var(--text-primary,#263449)}.trade-currency-line-heading span,.trade-currency-line-total span{font-size:.76rem;color:var(--text-muted,#778196)}.trade-currency-line-total{display:flex;flex-direction:column;gap:5px;white-space:nowrap}.trade-currency-line-total strong,.trade-currency-grand-total strong{color:var(--brand-base-color,#16A34A);font-variant-numeric:tabular-nums}.trade-line-remove{align-self:flex-start;padding:3px 0;border:0;background:transparent;color:#b4232f;font-size:.78rem;cursor:pointer}.trade-add-currency{padding:14px;border:1px dashed var(--border-color,#cbd5e1);border-radius:10px}.trade-add-currency>label{display:block;margin-bottom:8px;font-size:.82rem;font-weight:700}.trade-add-currency-controls{display:flex;gap:10px}.trade-add-currency-controls select{flex:1;min-width:0}.trade-currency-grand-total{display:flex;justify-content:space-between;align-items:center;padding:14px;border-radius:10px;background:var(--surface-subtle,#f8fafc)}.trade-currency-grand-total span{font-weight:700}.trade-currency-grand-total strong{font-size:1.1rem}@media(max-width:680px){.trade-currency-line{grid-template-columns:1fr}.trade-add-currency-controls{flex-direction:column}}
 .selected-rate-summary{display:flex;align-items:center;gap:14px;margin:0 24px 16px;padding:10px 14px;border:1px solid var(--brand-base-color,#16A34A);border-left:4px solid var(--brand-base-color,#16A34A);border-radius:9px;background:var(--surface-color,#fff)}
 .selected-rate-summary .trade-currency-flag{width:36px;height:26px}
 .selected-rate-currency,.selected-rate-value,.selected-rate-conversion{display:flex;flex-direction:column;gap:2px;min-width:0}
