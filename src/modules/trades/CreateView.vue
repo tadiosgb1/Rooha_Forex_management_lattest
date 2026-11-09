@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { apiRequest } from '../../services/apiClient'
 import { forexTransactionService } from '../../services/forexTransactionService'
 import { rateService } from '../../services/rateService'
-import SearchableSelect from '../../components/ui/SearchableSelect.vue'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import BaseInput from '../../components/ui/BaseInput.vue'
@@ -69,15 +68,6 @@ function chooseCountry(country) {
 }
 const selectedRate = computed(() => exchangeRates.value.find(item => String(item?.id ?? '') === String(form.rate_id)) ?? null)
 const selectedCurrency = computed(() => selectedRate.value?.currency ?? null)
-const currencyOptions = computed(() => exchangeRates.value.map(item => {
-  const currency = item?.currency ?? {}
-  const code = currency.code ?? currency.currency_code ?? item?.currency_code ?? 'FCY'
-  const buy = Number(item?.buy_rate ?? item?.buyRate)
-  const sell = Number(item?.sell_rate ?? item?.sellRate)
-  const buyLabel = Number.isFinite(buy) && buy > 0 ? formatMoney(buy) : '—'
-  const sellLabel = Number.isFinite(sell) && sell > 0 ? formatMoney(sell) : '—'
-  return { value: String(item?.id ?? ''), label: `${code} · BUY ${buyLabel} · SELL ${sellLabel} · ${item?.rate_date ?? 'Latest'}` }
-}).filter(option => option.value))
 const buyRate = computed(() => {
   const value = Number(selectedRate.value?.buy_rate ?? selectedRate.value?.buyRate)
   return Number.isFinite(value) && value > 0 ? value : null
