@@ -222,7 +222,6 @@ onMounted(load)
   .receipt-card{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
   .receipt-copies{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
   .voucher-copy{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;padding:1.5mm 1.5mm!important;box-sizing:border-box!important;border:1px solid #333!important;background:#fff!important;color:#17212f!important;overflow:visible!important;break-inside:avoid!important;page-break-inside:avoid!important}
-  .voucher-copy:not(:last-child){break-after:page!important;page-break-after:always!important}
   .voucher-header,.voucher-meta,.voucher-words,.voucher-parties,.voucher-signatures,.voucher-legal,.voucher-bottom{break-inside:avoid!important;page-break-inside:avoid!important}
   .voucher-table{break-inside:auto!important;page-break-inside:auto!important}
   .voucher-table thead{display:table-header-group}
