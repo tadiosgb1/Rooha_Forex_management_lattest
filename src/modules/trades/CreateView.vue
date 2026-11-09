@@ -95,7 +95,7 @@ function flagUrl(rate) {
   const path = rate?.currency?.flag_url
   if (!path) return ''
   if (/^https?:\/\//i.test(path)) return path
-  return \`${apiBaseUrl}/\${String(path).replace(/^\/+/, '')}\`
+  return apiBaseUrl + '/' + String(path).replace(/^\/+/, '')
 }
 function formatMoney(value) {
   if (value == null || !Number.isFinite(Number(value))) return '—'
