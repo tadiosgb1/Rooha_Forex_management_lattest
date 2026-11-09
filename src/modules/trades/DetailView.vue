@@ -80,7 +80,7 @@ onMounted(load)
   <section class="module-page">
     <div class="module-page-intro">
       <div><h2>Forex transaction details</h2><p class="trade-detail-subtitle">Record returned by the live API.</p></div>
-      <BaseButton variant="secondary" @click="router.push('/trades')">← Back to Trading Desk</BaseButton>
+      <div class="trade-detail-actions"><BaseButton variant="secondary" @click="router.push('/trades')">← Back to register</BaseButton><BaseButton v-if="transaction" @click="router.push(`/trades/${encodeURIComponent(id)}/receipt`)">Generate receipt</BaseButton></div>
     </div>
     <BaseCard class="module-panel trade-detail-panel">
       <p v-if="loading" class="trade-detail-state">Loading transaction…</p>
@@ -94,6 +94,7 @@ onMounted(load)
 </template>
 
 <style scoped>
+.trade-detail-actions { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
 .trade-detail-subtitle { margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem; }
 .trade-detail-panel { padding:24px; }
 .trade-detail-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:0; }
