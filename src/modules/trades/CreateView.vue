@@ -199,6 +199,61 @@ onMounted(async () => {
     serviceFeeLoading.value = false
   }
 })
+function buildPreviewTransaction() {
+  const currencies = currencyLineTotals.value.map(({ rate, price, amount, etb }) => ({
+    currency_id: rate?.currency_id ?? rate?.currency?.id,
+    rate_id: rate?.id,
+    currency: {
+      code: rate?.currency?.code ?? rate?.currency?.currency_code ?? rate?.currency_code ?? 'FCY',
+      name: rate?.currency?.name ?? rate?.currency?.currency_name ?? 'Foreign currency',
+    },
+    currency_code: rate?.currency?.code ?? rate?.currency?.currency_code ?? rate?.currency_code ?? 'FCY',
+    transaction_type: form.transaction_type,
+    fcy_amount: amount,
+    rate: price,
+    etb_amount: etb,
+  }))
+  const customer = {
+    fullname: form.fullname.trim(),
+    nationality: form.nationality.trim(),
+    phone_number: form.phone_number.trim(),
+    id_or_passport_number: form.id_or_passport_number.trim(),
+    city: form.city.trim(),
+    sub_city: form.sub_city.trim(),
+    wereda: form.wereda.trim(),
+  }
+  return {
+    id: 'LOCAL-TEST-PREVIEW',
+    reference: 'TEST-PREVIEW',
+    transaction_type: form.transaction_type,
+    payment_method: form.payment_method,
+    transaction_date: new Date().toISOString(),
+    customer,
+    customer_name: customer.fullname,
+    customer_phone: customer.phone_number,
+    currencies,
+    total_etb: totalEtbAmount.value,
+    service_fee: Number(form.service_fee) || 0,
+    teller_name: 'Preview only',
+    branch_name: 'Preview only',
+    is_local_preview: true,
+  }
+}
+function openReceiptPreview() {
+  if (!currencyLines.value.length || currencyLineTotals.value.some(line =>
+    !line.rate || line.price == null || !Number.isFinite(line.amount) || line.amount <= 0
+  )) {
+    toast.error('Add at least one currency line and enter a valid amount for every currency.')
+    return
+  }
+  try {
+    window.sessionStorage.setItem('rooha-forex-receipt-preview', JSON.stringify(buildPreviewTransaction()))
+    router.push({ name: 'trades-receipt', params: { id: 'preview' }, query: { preview: '1' } })
+  } catch (error) {
+    toast.error(error?.message || 'Unable to prepare the local receipt preview.')
+  }
+}
+
 async function submit() {
   if (saving.value) return
   if (!selectedRate.value || !validateSelectedRate() || rateValue.value == null) {
@@ -257,7 +312,13 @@ async function submit() {
       router.push('/trades')
     }
   } catch (error) {
-    toast.error(error?.message || 'Unable to record forex transaction.')
+    toast.error((error?.message || 'Unable to record forex transaction.') + ' Opening a local test receipt with the form data instead.')
+    try {
+      window.sessionStorage.setItem('rooha-forex-receipt-preview', JSON.stringify(buildPreviewTransaction()))
+      router.push({ name: 'trades-receipt', params: { id: 'preview' }, query: { preview: '1' } })
+    } catch (previewError) {
+      toast.error(previewError?.message || 'Could not open the local receipt preview.')
+    }
   } finally {
     saving.value = false
   }
@@ -388,7 +449,7 @@ async function submit() {
         </div>
       </section>
       <div class="trade-rate-feedback"><p v-if="rateError" class="trade-rate-error" role="alert">{{ rateError }}</p></div>
-      <div class="module-form-footer"><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="returnToRateList">← Back to rates</BaseButton></div><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
+      <div class="module-form-footer"><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="returnToRateList">← Back to rates</BaseButton></div><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="openReceiptPreview">Preview receipt</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
     </BaseCard>
   </section>
 </template>
