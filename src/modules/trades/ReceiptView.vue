@@ -67,8 +67,8 @@ const totalEtb = computed(() => {
   const explicit = Number(transaction.value?.total_etb ?? transaction.value?.etb_amount ?? transaction.value?.local_amount)
   return Number.isFinite(explicit) && explicit > 0 ? explicit : rows.value.reduce((sum, item) => sum + (Number.isFinite(item.local) ? item.local : 0), 0)
 })
-const amountInWords = computed(() => {
-  const value = Math.round(totalEtb.value * 100) / 100
+function amountInWordsFor(input) {
+  const value = Math.round(Number(input || 0) * 100) / 100
   const birr = Math.floor(value)
   const cents = Math.round((value - birr) * 100)
   const ones = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']
@@ -83,7 +83,7 @@ const amountInWords = computed(() => {
     return ''
   }
   return words(birr) + ' Birr' + (cents ? ' and ' + words(cents) + ' Cents' : ' Only')
-})
+}
 const details = computed(() => {
   const row = transaction.value || {}
   const customer = row.customer_profile ?? row.customer ?? {}
@@ -166,7 +166,7 @@ onMounted(load)
         <p>{{ error }}</p><BaseButton variant="secondary" @click="load">Try again</BaseButton>
       </div>
       <div v-else-if="transaction" class="receipt-copies">
-        <article class="voucher-copy">
+        <article v-for="item in rows" :key="item.number" class="voucher-copy">
           <header class="voucher-header">
             <div class="voucher-brand">
               <h1>ROOHA FOREX BUREAU</h1>
@@ -181,15 +181,10 @@ onMounted(load)
           </div>
           <table class="voucher-table">
             <thead><tr><th>SL NO</th><th>CURRENCY</th><th>FC TYPE</th><th>FC AMOUNT</th><th>RATE</th><th>LC AMOUNT (ETB)</th></tr></thead>
-            <tbody>
-              <tr v-for="item in rows" :key="item.number">
-                <td>{{ item.number }}</td><td>{{ item.currency }}</td><td>{{ item.type }}</td>
-                <td>{{ money(item.amount) }}</td><td>{{ money(item.rate, 4) }}</td><td>{{ money(item.local) }}</td>
-              </tr>
-            </tbody>
-            <tfoot><tr><td colspan="5">Total Amount (ETB)</td><td>{{ money(totalEtb) }}</td></tr></tfoot>
+            <tbody><tr><td>1</td><td>{{ item.currency }}</td><td>{{ item.type }}</td><td>{{ money(item.amount) }}</td><td>{{ money(item.rate, 4) }}</td><td>{{ money(item.local) }}</td></tr></tbody>
+            <tfoot><tr><td colspan="5">Total Amount (ETB)</td><td>{{ money(item.local) }}</td></tr></tfoot>
           </table>
-          <p class="voucher-words"><strong>Amount in Words:</strong> {{ amountInWords }}</p>
+          <p class="voucher-words"><strong>Amount in Words:</strong> {{ amountInWordsFor(item.local) }}</p>
           <div class="voucher-parties">
             <div><span>Teller Name</span><strong>{{ details.teller }}</strong></div>
             <div><span>Customer Name</span><strong>{{ details.customer }}</strong></div>
@@ -205,7 +200,7 @@ onMounted(load)
             <p>For inquiries or complaints: +251960444333 / +2519115083443</p>
           </div>
           <div class="voucher-bottom">
-            <small>ROOHA FOREX BUREAU • {{ details.reference }}</small>
+            <small>{{ details.reference }}</small>
             <div class="voucher-qr"><img v-if="qrCode" :src="qrCode" alt="Transaction verification QR code" /><span v-else>QR unavailable</span><small>Verify transaction</small></div>
           </div>
         </article>
@@ -218,7 +213,7 @@ onMounted(load)
 .receipt-actions{display:flex;gap:10px;flex-wrap:wrap}.receipt-card{padding:12px}.receipt-copies{max-width:1000px;margin:0 auto;color:#17212f}.voucher-copy{position:relative;padding:10px 12px 9px;border:1px solid #aeb8c5;background:#fff;page-break-inside:avoid}.voucher-copy+.voucher-copy{margin-top:0}.voucher-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:14px;border-bottom:2px solid #243247}.voucher-brand{text-align:center;flex:1}.voucher-brand h1{margin:0;font-size:1.35rem;letter-spacing:.06em}.voucher-brand p{margin:4px 0;font-size:.78rem}.voucher-brand h2{margin:9px 0 0;font-size:1rem}.voucher-meta{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;padding:7px 0}.voucher-meta div,.voucher-parties div{display:flex;flex-direction:column;gap:4px;min-width:0}.voucher-meta span,.voucher-parties span{font-size:.72rem;color:#526174}.voucher-meta strong,.voucher-parties strong{font-size:.82rem;overflow-wrap:anywhere}.voucher-table{width:100%;border-collapse:collapse;font-size:.76rem}.voucher-table th,.voucher-table td{padding:5px 5px;border:1px solid #9aa6b5;text-align:left}.voucher-table th{background:#eef2f6;font-size:.67rem}.voucher-table td:nth-child(1),.voucher-table td:nth-child(4),.voucher-table td:nth-child(5),.voucher-table td:nth-child(6){font-variant-numeric:tabular-nums}.voucher-table tfoot td{font-weight:800;background:#f5f7f9}.voucher-table tfoot td:last-child{text-align:right}.voucher-words{margin:7px 0;padding:6px;border:1px solid #cbd5e1;font-size:.78rem}.voucher-parties{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:7px 0}.voucher-signatures{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:7px 0}.voucher-signatures div{display:flex;flex-direction:column;gap:16px;font-size:.72rem}.voucher-signatures i{display:block;border-bottom:1px solid #475569}.voucher-legal{padding-top:9px;border-top:1px solid #cbd5e1;font-size:.67rem;line-height:1.45}.voucher-legal p{margin:4px 0}.voucher-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:4px}.voucher-bottom>small{color:#64748b;font-size:.62rem}.voucher-qr{display:flex;flex-direction:column;align-items:center;gap:3px}.voucher-qr img{width:62px;height:62px}.voucher-qr small{font-size:.6rem;color:#526174}.receipt-state{padding:30px;text-align:center;color:#64748b}.receipt-error{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#a52c28}
 @media(max-width:650px){.receipt-card{padding:6px}.voucher-copy{padding:14px 10px}.voucher-brand h1{font-size:1rem}.voucher-brand h2{font-size:.8rem}.voucher-meta,.voucher-parties{grid-template-columns:1fr 1fr}.voucher-table{font-size:.62rem}.voucher-table th,.voucher-table td{padding:6px 3px}.voucher-table th{font-size:.56rem}.voucher-signatures{gap:15px}}
 @media print{
-  @page{size:A4 portrait;margin:4mm}
+  @page{size:A4 portrait;margin:2mm}
   :global(html),:global(body){background:#fff!important;margin:0!important;padding:0!important}
   :global(body *){visibility:hidden!important}
   .receipt-page,.receipt-page *{visibility:visible!important}
@@ -226,7 +221,7 @@ onMounted(load)
   .no-print{display:none!important}
   .receipt-card{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
   .receipt-copies{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
-  .voucher-copy{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;padding:3mm 3mm!important;box-sizing:border-box!important;border:1px solid #333!important;background:#fff!important;color:#17212f!important;overflow:visible!important;break-inside:auto!important;page-break-inside:auto!important}
+  .voucher-copy{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;padding:1.5mm 1.5mm!important;box-sizing:border-box!important;border:1px solid #333!important;background:#fff!important;color:#17212f!important;overflow:visible!important;break-inside:avoid!important;page-break-inside:always!important}
   .voucher-header,.voucher-meta,.voucher-words,.voucher-parties,.voucher-signatures,.voucher-legal,.voucher-bottom{break-inside:avoid!important;page-break-inside:avoid!important}\n  .voucher-table{break-inside:auto!important;page-break-inside:auto!important}\n  .voucher-table thead{display:table-header-group}\n  .voucher-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
   .voucher-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}
   .voucher-table th,.voucher-table td{padding:4px 4px!important;border:1px solid #64748b!important;overflow-wrap:anywhere!important}
