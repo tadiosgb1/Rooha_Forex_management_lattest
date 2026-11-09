@@ -221,8 +221,12 @@ onMounted(load)
   .no-print{display:none!important}
   .receipt-card{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important}
   .receipt-copies{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
-  .voucher-copy{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;padding:1.5mm 1.5mm!important;box-sizing:border-box!important;border:1px solid #333!important;background:#fff!important;color:#17212f!important;overflow:visible!important;break-inside:avoid!important;page-break-inside:always!important}
-  .voucher-header,.voucher-meta,.voucher-words,.voucher-parties,.voucher-signatures,.voucher-legal,.voucher-bottom{break-inside:avoid!important;page-break-inside:avoid!important}\n  .voucher-table{break-inside:auto!important;page-break-inside:auto!important}\n  .voucher-table thead{display:table-header-group}\n  .voucher-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
+  .voucher-copy{display:block!important;position:relative!important;width:100%!important;max-width:none!important;min-height:0!important;height:auto!important;margin:0!important;padding:1.5mm 1.5mm!important;box-sizing:border-box!important;border:1px solid #333!important;background:#fff!important;color:#17212f!important;overflow:visible!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  .voucher-copy:not(:last-child){break-after:page!important;page-break-after:always!important}
+  .voucher-header,.voucher-meta,.voucher-words,.voucher-parties,.voucher-signatures,.voucher-legal,.voucher-bottom{break-inside:avoid!important;page-break-inside:avoid!important}
+  .voucher-table{break-inside:auto!important;page-break-inside:auto!important}
+  .voucher-table thead{display:table-header-group}
+  .voucher-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
   .voucher-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}
   .voucher-table th,.voucher-table td{padding:4px 4px!important;border:1px solid #64748b!important;overflow-wrap:anywhere!important}
   .voucher-table th{background:#e9edf2!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
