@@ -23,6 +23,8 @@ const serviceFeeError = ref('')
 const countryOpen = ref(false)
 const countrySearch = ref('')
 const rateError = ref('')
+const activeTab = ref('SELL')
+const showTradeForm = ref(false)
 const form = reactive({
   fullname: '',
   nationality: 'Ethiopian',
@@ -94,6 +96,26 @@ function formatMoney(value) {
 }
 function currencyCode() {
   return selectedCurrency.value?.code ?? selectedCurrency.value?.currency_code ?? selectedRate.value?.currency_code ?? 'foreign currency'
+}
+function openRateForTrade(rate) {
+  form.rate_id = String(rate?.id ?? '')
+  form.transaction_type = activeTab.value
+  showTradeForm.value = true
+  validateSelectedRate()
+}
+function returnToRateList() {
+  showTradeForm.value = false
+  rateError.value = ''
+}
+function setTradeTab(tab) {
+  if (tab === 'REPORT') {
+    router.push('/trades')
+    return
+  }
+  activeTab.value = tab
+  form.transaction_type = tab
+  showTradeForm.value = false
+  rateError.value = ''
 }
 function validateSelectedRate() {
   if (!selectedRate.value) {
@@ -205,12 +227,35 @@ async function submit() {
       <div><h2>Trading Desk</h2><p class="trade-form-subtitle">Enter customer details directly for this transaction.</p></div>
       <BaseButton variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">← Back to trades</BaseButton>
     </div>
-    <div class="trade-side-switch" role="tablist" aria-label="Trade actions">
-      <button type="button" role="tab" class="trade-side-button trade-sell-button" :class="{ 'is-active': form.transaction_type === 'SELL' }" :aria-selected="form.transaction_type === 'SELL'" @click="form.transaction_type = 'SELL'">SELL</button>
-      <button type="button" role="tab" class="trade-side-button trade-buy-button" :class="{ 'is-active': form.transaction_type === 'BUY' }" :aria-selected="form.transaction_type === 'BUY'" @click="form.transaction_type = 'BUY'">BUY</button>
-      <button type="button" role="tab" class="trade-side-button trade-report-button" aria-selected="false" @click="router.push('/trades')">REPORT</button>
+    <div class="trade-tabs" role="tablist" aria-label="Trading desk">
+      <button id="trade-tab-sell" type="button" role="tab" class="trade-tab" :class="{ 'is-active': activeTab === 'SELL' }" :aria-selected="activeTab === 'SELL'" aria-controls="trade-rates-panel" :tabindex="activeTab === 'SELL' ? 0 : -1" @click="setTradeTab('SELL')">SELL</button>
+      <button id="trade-tab-buy" type="button" role="tab" class="trade-tab" :class="{ 'is-active': activeTab === 'BUY' }" :aria-selected="activeTab === 'BUY'" aria-controls="trade-rates-panel" :tabindex="activeTab === 'BUY' ? 0 : -1" @click="setTradeTab('BUY')">BUY</button>
+      <button id="trade-tab-report" type="button" role="tab" class="trade-tab trade-report-tab" aria-selected="false" tabindex="0" @click="setTradeTab('REPORT')">REPORT</button>
     </div>
-    <BaseCard as="form" class="module-panel module-form-panel trading-desk-form" @submit.prevent="submit">
+    <section v-if="!showTradeForm" id="trade-rates-panel" class="trade-rates-panel module-panel" role="tabpanel" :aria-labelledby="activeTab === 'BUY' ? 'trade-tab-buy' : 'trade-tab-sell'">
+      <div class="trade-rates-heading">
+        <div><h3>{{ activeTab }} exchange rates</h3><p>Select a rate to continue with a {{ activeTab.toLowerCase() }} transaction.</p></div>
+        <span class="trade-rates-count">{{ exchangeRates.length }} rates</span>
+      </div>
+      <div v-if="loading" class="trade-loading">Loading approved exchange rates…</div>
+      <div v-else-if="loadError || rateError" class="trade-rates-empty" role="status">{{ loadError || rateError }}</div>
+      <div v-else-if="!exchangeRates.length" class="trade-rates-empty">No approved active exchange rates are currently available.</div>
+      <div v-else class="trade-rates-table-wrap">
+        <table class="trade-rates-table">
+          <thead><tr><th>Currency</th><th>BUY rate (ETB)</th><th>SELL rate (ETB)</th><th>Rate date</th><th><span class="sr-only">Action</span></th></tr></thead>
+          <tbody>
+            <tr v-for="rate in exchangeRates" :key="rate.id">
+              <td><strong>{{ rate.currency?.code ?? rate.currency?.currency_code ?? rate.currency_code ?? 'FCY' }}</strong><small>{{ rate.currency?.name ?? rate.currency?.currency_name ?? '' }}</small></td>
+              <td :class="{ 'trade-rate-current': activeTab === 'BUY' }">{{ formatMoney(rate.buy_rate ?? rate.buyRate) }}</td>
+              <td :class="{ 'trade-rate-current': activeTab === 'SELL' }">{{ formatMoney(rate.sell_rate ?? rate.sellRate) }}</td>
+              <td>{{ rate.rate_date ?? '—' }}</td>
+              <td><button type="button" class="trade-rate-select" @click="openRateForTrade(rate)">Use rate for {{ activeTab }}</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <BaseCard v-else as="form" class="module-panel module-form-panel trading-desk-form" @submit.prevent="submit">
       <div v-if="loading" class="trade-loading">Loading approved exchange rates…</div>
       <div v-if="loadError" class="module-form-field" role="status"><p>{{ loadError }}</p><BaseButton type="button" variant="secondary" @click="router.go(0)">Reload</BaseButton></div>
       <section class="trade-form-section">
@@ -269,13 +314,13 @@ async function submit() {
           <div class="trade-calculation-line"><span>ETB equivalent</span><strong class="trade-etb-total">{{ etbAmount == null ? '—' : formatMoney(etbAmount) + ' ETB' }}</strong></div>
         </div>
       </div>
-      <div class="module-form-footer"><span></span><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
+      <div class="module-form-footer"><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="returnToRateList">← Back to rates</BaseButton></div><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
     </BaseCard>
   </section>
 </template>
 <style scoped>
 .nationality-field{position:relative}.nationality-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;cursor:pointer}.nationality-selected{display:flex;align-items:center;gap:10px}.nationality-selected .fi,.nationality-option .fi{width:1.35rem;height:1rem;flex:none;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}.nationality-chevron{color:var(--text-muted,#778196)}.nationality-menu{position:absolute;z-index:30;top:calc(100% + 5px);left:0;right:0;padding:8px;background:var(--surface-color,#fff);border:1px solid var(--border-color,#d9e0ea);border-radius:10px;box-shadow:0 12px 30px rgba(20,30,50,.16)}.nationality-search{width:100%;margin-bottom:7px}.nationality-options{max-height:260px;overflow-y:auto}.nationality-option{display:flex;align-items:center;gap:10px;width:100%;padding:9px 8px;border:0;border-radius:6px;background:transparent;color:var(--text-primary,#263449);text-align:left;cursor:pointer}.nationality-option:hover,.nationality-option.is-selected{background:var(--surface-subtle,#f1f5f9)}.nationality-option small{margin-left:auto;color:var(--text-muted,#778196)}.nationality-empty{padding:10px;color:var(--text-muted,#778196);font-size:.85rem}.trading-desk-heading{align-items:center;margin-bottom:16px}.trading-desk-heading h2{margin:0}.trade-form-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}
-.trade-side-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 16px;padding:6px;border:1px solid var(--border-color,#d9e0ea);border-radius:14px;background:var(--surface-subtle,#f5f7fa)}.trade-side-button{min-height:46px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--text-muted,#778196);font-weight:800;letter-spacing:.06em;cursor:pointer;transition:background .15s,border-color .15s,color .15s,box-shadow .15s}.trade-side-button:hover{background:var(--surface-color,#fff);color:var(--text-primary,#263449)}.trade-buy-button.is-active{background:#e8f7ee;border-color:#218653;color:#17663f;box-shadow:0 2px 8px rgba(33,134,83,.12)}.trade-sell-button.is-active{background:#fff0ef;border-color:#c83b36;color:#a52c28;box-shadow:0 2px 8px rgba(200,59,54,.12)}.trade-report-button{color:var(--text-muted,#778196)}
+.trade-tabs{display:flex;align-items:center;gap:28px;margin:0 0 18px;padding:0 8px;border-bottom:1px solid var(--border-color,#d9e0ea)}.trade-tab{position:relative;min-height:48px;padding:0 12px;border:0;background:transparent;color:var(--text-muted,#778196);font-weight:750;letter-spacing:.04em;cursor:pointer}.trade-tab:hover{color:var(--text-primary,#263449)}.trade-tab.is-active{color:var(--color-primary,#2357a5)}.trade-tab.is-active::after{position:absolute;right:0;bottom:-1px;left:0;height:3px;border-radius:3px 3px 0 0;background:var(--color-primary,#2357a5);content:''}.trade-report-tab{margin-left:auto}.trade-rates-panel{padding:22px 24px;overflow:hidden}.trade-rates-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.trade-rates-heading h3{margin:0;font-size:1.05rem}.trade-rates-heading p{margin:5px 0 0;color:var(--text-muted,#778196);font-size:.85rem}.trade-rates-count{padding:5px 10px;border-radius:20px;background:var(--surface-subtle,#f1f5f9);color:var(--text-muted,#778196);font-size:.78rem;font-weight:700}.trade-rates-table-wrap{width:100%;overflow-x:auto}.trade-rates-table{width:100%;border-collapse:collapse;white-space:nowrap}.trade-rates-table th,.trade-rates-table td{padding:13px 12px;border-bottom:1px solid var(--border-color,#e5e9ef);text-align:left;font-size:.88rem}.trade-rates-table th{color:var(--text-muted,#778196);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}.trade-rates-table td small{display:block;margin-top:3px;color:var(--text-muted,#778196)}.trade-rates-table tbody tr:hover{background:var(--surface-subtle,#f8fafc)}.trade-rate-current{font-weight:800;color:var(--color-primary,#2357a5)}.trade-rate-select{padding:8px 11px;border:1px solid var(--color-primary,#2357a5);border-radius:7px;background:transparent;color:var(--color-primary,#2357a5);font-size:.78rem;font-weight:750;cursor:pointer}.trade-rate-select:hover{background:var(--surface-subtle,#f1f5f9)}.trade-rates-empty{padding:28px 12px;text-align:center;color:var(--text-muted,#778196)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .trading-desk-form{padding-top:20px}.trade-loading,.trade-rate-status{color:var(--text-muted,#778196);font-size:.85rem}.trade-form-section{padding:0 24px 22px;margin-bottom:22px;border-bottom:1px solid var(--border-color,#e5e9ef)}.trade-form-section-heading{margin-bottom:15px}.trade-form-section-heading h3{margin:0;font-size:1rem}.trade-form-section-heading p{margin:5px 0 0;color:var(--text-muted,#778196);font-size:.82rem}.trade-rate-badges{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 12px}.trade-rate-badge{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border-color,#dfe5ed);border-radius:8px;background:var(--surface-subtle,#f8fafc);color:var(--text-primary,#263449)}.trade-rate-badge span{font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--text-muted,#778196)}.trade-rate-badge strong{font-size:.88rem;font-variant-numeric:tabular-nums}.trade-rate-badge-active-buy{background:#e8f7ee;border-color:#218653;color:#17663f}.trade-rate-badge-active-sell{background:#fff0ef;border-color:#c83b36;color:#a52c28}.trade-rate-date{font-size:.78rem;color:var(--text-muted,#778196)}.trade-rate-feedback{margin:0 24px 20px}.trade-rate-error{color:#b4232f;margin:0 0 12px}.trade-etb-calculation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px;border:1px solid var(--border-color,#e3e8f0);border-radius:12px;background:var(--surface-subtle,#f8fafc)}.trade-calculation-line{display:flex;flex-direction:column;gap:6px;min-width:0}.trade-calculation-line span{color:var(--text-muted,#778196);font-size:.78rem}.trade-calculation-line strong{color:var(--text-primary,#263449);font-size:.95rem;overflow-wrap:anywhere}.trade-calculation-line .trade-etb-total{font-size:1.15rem;color:var(--color-primary,#2357a5)}
 @media(max-width:640px){.trade-form-section{padding-left:16px;padding-right:16px}.trade-etb-calculation{grid-template-columns:1fr}.trade-rate-badges{align-items:flex-start}}
 </style>
