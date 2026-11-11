@@ -34,6 +34,7 @@ const customerMatches = ref([])
 const customerSearchLoading = ref(false)
 const selectedCustomerId = ref('')
 const customerSearchError = ref('')
+const sellPurposeOptions = ['Travel', 'Tourist Travel', 'Visit Travel', 'Training Travel', 'Business Travel', 'Medical Travel', 'Meeting Travel', 'Holiday Travel', 'Education Travel', 'Sport Travel', 'Exhibition Travel', 'Haji Travel', 'Other']
 const sellPurpose = ref('Travel')
 let customerSearchRequest = 0
 const form = reactive({
@@ -48,7 +49,7 @@ const form = reactive({
   transaction_type: 'BUY',
   payment_method: 'CASH',
   service_fee: '0',
-  fcy_amount: '100',
+  fcy_amount: '0',
 })
 
 function records(response) {
@@ -140,8 +141,8 @@ function currencyCode() {
 function openRateForTrade(rate) {
   form.rate_id = String(rate?.id ?? '')
   form.transaction_type = activeTab.value
-  form.fcy_amount = '100'
-  currencyLines.value = [{ rate_id: form.rate_id, fcy_amount: '100' }]
+  form.fcy_amount = '0'
+  currencyLines.value = [{ rate_id: form.rate_id, fcy_amount: '0' }]
   addCurrencyRateId.value = ''
   currencyLineError.value = ''
   showTradeForm.value = true
@@ -299,12 +300,12 @@ async function submit() {
   if (!currencyLines.value.length || currencyLineTotals.value.some(line => !line.rate || !line.price || !Number.isFinite(line.amount) || line.amount <= 0)) { toast.error('Add at least one currency and enter a valid amount for every currency.'); return }
   if (!selectedCustomerId.value && (!form.fullname.trim() || !form.nationality.trim() || !form.phone_number.trim())) { toast.error('Select an existing customer or enter the new customer details.'); return }
   if (form.transaction_type === 'BUY' && !selectedCustomerId.value && (!form.id_or_passport_number.trim() || !form.city.trim() || !form.sub_city.trim() || !form.wereda.trim())) { toast.error('For a new BUY customer, complete the ID/passport and address fields.'); return }
-  if (form.transaction_type === 'SELL' && !sellPurpose.trim()) { toast.error('Enter the purpose of the SELL transaction.'); return }
+  if (form.transaction_type === 'SELL' && (typeof sellPurpose.value !== 'string' || !sellPurpose.value.trim() || !sellPurposeOptions.includes(sellPurpose.value))) { toast.error('Select a valid purpose for the SELL transaction.'); return }
   const trades = currencyLineTotals.value.map(({ rate, amount }) => ({ currency_id: rate?.currency_id ?? rate?.currency?.id, fcy_amount: amount }))
   if (trades.some(trade => !trade.currency_id)) { toast.error('A selected exchange rate is missing its currency ID.'); return }
   const payload = { ...(selectedCustomerId.value ? { customer_id: selectedCustomerId.value } : { customer: form.transaction_type === 'BUY' ? { fullname: form.fullname.trim(), nationality: form.nationality.trim(), phone_number: form.phone_number.trim(), id_or_passport_number: form.id_or_passport_number.trim(), city: form.city.trim(), sub_city: form.sub_city.trim(), wereda: form.wereda.trim() } : { fullname: form.fullname.trim(), nationality: form.nationality.trim(), phone_number: form.phone_number.trim() } }), transaction_type: form.transaction_type, payment_method: form.payment_method.trim().toUpperCase(), trades }
   if (form.transaction_type === 'BUY') { payload.service_fee = Number(form.service_fee); if (!Number.isFinite(payload.service_fee) || payload.service_fee < 0) { toast.error('Enter a valid service fee.'); return } }
-  else payload.sell_purpose = sellPurpose.trim()
+  else payload.sell_purpose = sellPurpose.value
   saving.value = true
   try {
     const response = await forexTransactionService.create(payload)
@@ -382,8 +383,8 @@ async function submit() {
               <button v-if="index > 0" type="button" class="trade-line-remove" @click="removeCurrencyLine(index)">Remove</button>
             </div>
             <div class="module-form-field">
-              <BaseInput v-if="index === 0" v-model="form.fcy_amount" :label="'FCY amount (' + (rateForLine(line)?.currency?.code ?? currencyCode()) + ')'" :id="'fcy-amount-' + index" type="number" min="0.000001" step="any" required />
-              <BaseInput v-else v-model="line.fcy_amount" :label="'FCY amount (' + (rateForLine(line)?.currency?.code ?? 'FCY') + ')'" :id="'fcy-amount-' + index" type="number" min="0.000001" step="any" required />
+              <BaseInput v-if="index === 0" v-model="form.fcy_amount" :label="'FCY amount (' + (rateForLine(line)?.currency?.code ?? currencyCode()) + ')'" :id="'fcy-amount-' + index" type="number" min="0.000001" step="any" placeholder="0" required />
+              <BaseInput v-else v-model="line.fcy_amount" :label="'FCY amount (' + (rateForLine(line)?.currency?.code ?? 'FCY') + ')'" :id="'fcy-amount-' + index" type="number" min="0.000001" step="any" placeholder="0" required />
             </div>
             <div class="trade-currency-line-total"><span>ETB equivalent</span><strong>{{ formatMoney(currencyLineTotals[index]?.etb) }} ETB</strong></div>
           </div>
@@ -404,7 +405,7 @@ async function submit() {
       <section class="trade-form-section">
         <div class="trade-form-section-heading"><h3>Transaction details</h3><p>Confirm how this transaction will be processed.</p></div>
         <div class="module-form-grid">
-          <div v-if="form.transaction_type === 'SELL'" class="module-form-field"><BaseInput v-model="sellPurpose" label="Sell purpose" id="trade-sell-purpose" placeholder="Travel" required /></div>
+          <div v-if="form.transaction_type === 'SELL'" class="module-form-field"><label for="trade-sell-purpose">Sell purpose</label><select id="trade-sell-purpose" v-model="sellPurpose" class="ui-input" required><option v-for="purpose in sellPurposeOptions" :key="purpose" :value="purpose">{{ purpose }}</option></select></div>
           <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required>
               <option value="CASH">Cash</option>
               <option value="BANK_TRANSFER">Bank transfer</option>
