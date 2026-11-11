@@ -87,7 +87,7 @@ async function searchCustomers() {
   customerSearchLoading.value = true
   customerSearchError.value = ''
   try {
-    const response = await customerService.list({ search: query, q: query })
+    const response = await customerService.list({ search: query })
     if (request !== customerSearchRequest) return
     customerMatches.value = records(response).filter(row => customerId(row))
   } catch (error) {
@@ -428,7 +428,7 @@ async function submit() {
             </div>
           </div>
           <div class="module-form-field"><BaseInput v-model="form.phone_number" label="Phone number" id="trade-customer-phone" type="tel" autocomplete="tel" required /></div>
-          <div class="module-form-field"><BaseInput v-model="form.id_or_passport_number" label="ID or passport number" id="trade-customer-id" required /></div>
+          <div v-if="form.transaction_type === 'BUY' && !selectedCustomerId" class="module-form-field"><BaseInput v-model="form.id_or_passport_number" label="ID or passport number" id="trade-customer-id" required /></div>
           <template v-if="form.transaction_type === 'BUY' && !selectedCustomerId">
             <div class="module-form-field"><BaseInput v-model="form.city" label="City" id="trade-customer-city" required /></div>
             <div class="module-form-field"><BaseInput v-model="form.sub_city" label="Sub-city" id="trade-customer-sub-city" required /></div>
