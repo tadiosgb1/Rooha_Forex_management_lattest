@@ -9,12 +9,14 @@ import BaseInput from '../../components/ui/BaseInput.vue'
 import BaseStatCard from '../../components/ui/BaseStatCard.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import BaseTable from '../../components/ui/BaseTable.vue'
+import DateRangeFilter from '../../components/ui/DateRangeFilter.vue'
 
 const router = useRouter()
 const loading = ref(false)
 const error = ref('')
 const transactions = ref([])
 const search = ref('')
+const dateRange = ref({ preset: '30' })
 const canCreate = computed(() => hasAnyPermission(['forex_transactions.create', 'forex_transactions:create']))
 
 const columns = [
@@ -71,14 +73,39 @@ function normalize(row, index) {
     raw: row,
   }
 }
+function transactionDate(row) {
+  const value = first(row.created_at, row.createdAt, row.transaction_date, row.created_date, row.date)
+  if (!value) return null
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+function inSelectedRange(row) {
+  const date = transactionDate(row)
+  if (!date) return false
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let start = today
+  let end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  const selected = dateRange.value
+  if (selected.preset === 'custom') {
+    if (!selected.from || !selected.to) return false
+    start = new Date(selected.from + 'T00:00:00')
+    end = new Date(selected.to + 'T23:59:59.999')
+  } else if (selected.preset !== 'today') {
+    const days = Number(selected.preset) || 30
+    start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - days + 1)
+  }
+  return date >= start && date <= end
+}
+const dateFilteredTransactions = computed(() => transactions.value.filter(inSelectedRange))
 const rows = computed(() => {
   const q = search.value.trim().toLowerCase()
-  return transactions.value.map(normalize).filter(row => !q || [
+  return dateFilteredTransactions.value.map(normalize).filter(row => !q || [
     row.reference, row.customer, row.direction, row.currency, row.amount, row.rate, row.status, row.created,
   ].some(value => String(value ?? '').toLowerCase().includes(q)))
 })
-const buyCount = computed(() => transactions.value.filter(row => String(first(row.transaction_type, row.direction, row.type, '')).toUpperCase() === 'BUY').length)
-const sellCount = computed(() => transactions.value.filter(row => String(first(row.transaction_type, row.direction, row.type, '')).toUpperCase() === 'SELL').length)
+const buyCount = computed(() => dateFilteredTransactions.value.filter(row => String(first(row.transaction_type, row.direction, row.type, '')).toUpperCase() === 'BUY').length)
+const sellCount = computed(() => dateFilteredTransactions.value.filter(row => String(first(row.transaction_type, row.direction, row.type, '')).toUpperCase() === 'SELL').length)
 function formatNumber(value) {
   if (value === null || value === undefined || !Number.isFinite(Number(value))) return '—'
   return Number(value).toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -124,6 +151,7 @@ onMounted(loadTransactions)
     <BaseCard as="section" class="module-panel">
       <div class="module-panel-header">
         <h3>Forex transaction register</h3>
+        <DateRangeFilter v-model="dateRange" />
         <label class="module-search"><span>⌕</span><BaseInput v-model="search" placeholder="Search transactions…" aria-label="Search transactions" size="sm" /></label>
       </div>
       <div v-if="error" class="trades-error" role="alert">
@@ -144,7 +172,7 @@ onMounted(loadTransactions)
         </template>
         <template #actions="{ row }"><div class="trade-row-actions"><BaseButton variant="ghost" size="sm" @click="router.push(`/trades/${encodeURIComponent(row.id)}`)">Details</BaseButton><BaseButton variant="secondary" size="sm" @click="router.push(`/trades/${encodeURIComponent(row.id)}/receipt`)">Receipt</BaseButton></div></template>
       </BaseTable>
-      <div v-if="!loading && !error && transactions.length" class="module-table-footer">Showing {{ rows.length }} of {{ transactions.length }} API transactions</div>
+      <div v-if="!loading && !error && transactions.length" class="module-table-footer">Showing {{ rows.length }} of {{ dateFilteredTransactions.length }} transactions in selected period</div>
     </BaseCard>
   </section>
 </template>
@@ -153,6 +181,7 @@ onMounted(loadTransactions)
 .trades-subtitle { margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem; }
 .trade-row-actions { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
 .trades-heading-actions { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+:deep(.module-panel-header){flex-wrap:wrap}
 .trades-state { padding:24px;color:var(--text-muted,#778196);text-align:center; }
 .trades-error { display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;color:#a52c28;background:#fff0ef;border-radius:8px;margin:12px 0; }
 .trade-buy-chip { color:#17663f;background:#e8f7ee; }
