@@ -143,7 +143,7 @@ onMounted(loadTransactions)
     </div>
 
     <div class="module-stat-row">
-      <BaseStatCard class="module-stat-card" label="Total transactions" :value="transactions.length" />
+      <BaseStatCard class="module-stat-card" label="Total transactions" :value="dateFilteredTransactions.length" />
       <BaseStatCard class="module-stat-card" label="BUY transactions" :value="buyCount" />
       <BaseStatCard class="module-stat-card" label="SELL transactions" :value="sellCount" />
     </div>
