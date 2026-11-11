@@ -8,6 +8,7 @@ import BaseBadge from '../../components/ui/BaseBadge.vue'
 import BaseInput from '../../components/ui/BaseInput.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
 import BaseTable from '../../components/ui/BaseTable.vue'
+import DateRangeFilter from '../../components/ui/DateRangeFilter.vue'
 
 const props = defineProps({ transactionType: { type: String, required: true } })
 const route = useRoute()
@@ -16,6 +17,7 @@ const loading = ref(false)
 const error = ref('')
 const transactions = ref([])
 const search = ref('')
+const dateRange = ref({ preset: '30' })
 const statuses = ['all', 'pending', 'approved', 'rejected']
 const status = computed(() => statuses.includes(String(route.query.status || 'all').toLowerCase()) ? String(route.query.status || 'all').toLowerCase() : 'all')
 const canCreate = computed(() => hasAnyPermission(['forex_transactions.create', 'forex_transactions:create']))
@@ -59,10 +61,28 @@ function normalize(row, index) {
     created: first(row.created_at, row.createdAt, row.transaction_date, row.created_date, row.date, '—'),
   }
 }
+function inSelectedRange(row) {
+  const value = first(row.created_at, row.createdAt, row.transaction_date, row.created_date, row.date)
+  const date = value ? new Date(value) : null
+  if (!date || Number.isNaN(date.getTime())) return false
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let start = today
+  let end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  if (dateRange.value.preset === 'custom') {
+    if (!dateRange.value.from || !dateRange.value.to) return false
+    start = new Date(dateRange.value.from + 'T00:00:00')
+    end = new Date(dateRange.value.to + 'T23:59:59.999')
+  } else if (dateRange.value.preset !== 'today') {
+    const days = Number(dateRange.value.preset) || 30
+    start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - days + 1)
+  }
+  return date >= start && date <= end
+}
 const filteredRows = computed(() => {
   const q = search.value.trim().toLowerCase()
   return transactions.value
-    .filter(row => String(first(row.transaction_type, row.direction, row.type, '')).toUpperCase() === props.transactionType)
+    .filter(row => String(first(row.transaction_type, row.direction, row.type, '')).toUpperCase() === props.transactionType && inSelectedRange(row))
     .map(normalize)
     .filter(row => !q || [row.reference, row.customer, row.currency, row.amount, row.rate, row.status, row.created].some(value => String(value ?? '').toLowerCase().includes(q)))
 })
@@ -100,7 +120,7 @@ onMounted(loadTransactions)
 <template>
   <section class="module-page transaction-report-page">
     <div class="module-page-intro">
-      <div><h2>{{ title }}</h2><p class="report-subtitle">Review {{ transactionType }} transactions by approval status.</p></div>
+      <div><h2>{{ title }}</h2><p class="report-subtitle">Review {{ transactionType }} transactions by date and approval status.</p></div>
       <div class="report-actions">
         <BaseButton variant="secondary" :disabled="loading" @click="loadTransactions">{{ loading ? 'Refreshing…' : 'Refresh' }}</BaseButton>
         <BaseButton v-if="canCreate" class="module-primary-btn" @click="router.push('/trades/new')">＋ New transaction</BaseButton>
@@ -110,7 +130,7 @@ onMounted(loadTransactions)
       <button v-for="item in statuses" :key="item" type="button" :class="{ active: status === item }" :aria-pressed="status === item" @click="setStatus(item)">{{ item.charAt(0).toUpperCase() + item.slice(1) }}</button>
     </div>
     <BaseCard as="section" class="module-panel">
-      <div class="module-panel-header"><h3>{{ title }}</h3><label class="module-search"><span>⌕</span><BaseInput v-model="search" placeholder="Search transactions…" aria-label="Search transactions" size="sm" /></label></div>
+      <div class="module-panel-header"><h3>{{ title }}</h3><DateRangeFilter v-model="dateRange" /><label class="module-search"><span>⌕</span><BaseInput v-model="search" placeholder="Search transactions…" aria-label="Search transactions" size="sm" /></label></div>
       <div v-if="error" class="report-error" role="alert"><span>{{ error }}</span><BaseButton variant="secondary" size="sm" @click="loadTransactions">Try again</BaseButton></div>
       <p v-else-if="loading" class="report-state">Loading {{ transactionType }} transactions from /forex-transactions{{ status === 'all' ? '' : '?status=' + status }}…</p>
       <p v-else-if="!filteredRows.length" class="report-state">No {{ transactionType }} transactions found for status “{{ status }}”.</p>
@@ -130,5 +150,5 @@ onMounted(loadTransactions)
 </template>
 
 <style scoped>
-.report-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}.report-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.report-status-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.report-status-filters button{padding:8px 15px;border:1px solid var(--border-color,#d9e0ea);border-radius:8px;background:var(--surface-color,#fff);color:var(--text-muted,#778196);font-weight:650;cursor:pointer}.report-status-filters button.active{border-color:var(--brand-base-color,#16A34A);background:color-mix(in srgb,var(--brand-base-color,#16A34A) 9%,var(--surface-color,#fff));color:var(--brand-base-color,#16A34A)}.report-state{padding:24px;color:var(--text-muted,#778196);text-align:center}.report-error{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;color:#a52c28;background:#fff0ef;border-radius:8px;margin:12px 0}.report-row-actions{display:flex;gap:6px;flex-wrap:wrap}.transaction-report-page :deep(.ui-badge--success){background:#eaf4ee;color:#397653;border:1px solid #d8e9dd}.transaction-report-page :deep(.ui-badge--warning){background:#fff5df;color:#946b20;border:1px solid #f2e6c8}.transaction-report-page :deep(.ui-badge--danger){background:#fbecee;color:#ad4650;border:1px solid #f1d9dc}@media(max-width:640px){.report-actions{width:100%}.report-error{align-items:flex-start;flex-direction:column}}
+.report-subtitle{margin:6px 0 0;color:var(--text-muted,#778196);font-size:.9rem}.report-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.report-status-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.report-status-filters button{padding:8px 15px;border:1px solid var(--border-color,#d9e0ea);border-radius:8px;background:var(--surface-color,#fff);color:var(--text-muted,#778196);font-weight:650;cursor:pointer}.report-status-filters button.active{border-color:var(--brand-base-color,#16A34A);background:color-mix(in srgb,var(--brand-base-color,#16A34A) 9%,var(--surface-color,#fff));color:var(--brand-base-color,#16A34A)}.report-state{padding:24px;color:var(--text-muted,#778196);text-align:center}.report-error{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;color:#a52c28;background:#fff0ef;border-radius:8px;margin:12px 0}.report-row-actions{display:flex;gap:6px;flex-wrap:wrap}.transaction-report-page :deep(.module-panel-header){flex-wrap:wrap}.transaction-report-page :deep(.ui-badge--success){background:#eaf4ee;color:#397653;border:1px solid #d8e9dd}.transaction-report-page :deep(.ui-badge--warning){background:#fff5df;color:#946b20;border:1px solid #f2e6c8}.transaction-report-page :deep(.ui-badge--danger){background:#fbecee;color:#ad4650;border:1px solid #f1d9dc}@media(max-width:640px){.report-actions{width:100%}.report-error{align-items:flex-start;flex-direction:column}}
 </style>
