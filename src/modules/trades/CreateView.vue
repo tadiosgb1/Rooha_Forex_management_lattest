@@ -400,7 +400,15 @@ async function submit() {
         </div>
       </section>
       <section class="trade-form-section">
-        <div class="trade-form-section-heading"><h3>Customer details</h3></div>
+        <div class="trade-form-section-heading"><h3>Customer details</h3><p>Search for an existing customer or enter a new customer below.</p></div>
+        <div class="trade-customer-search">
+          <label for="trade-customer-search">Find existing customer</label>
+          <div class="trade-customer-search-row"><input id="trade-customer-search" v-model="customerSearch" class="ui-input" type="search" placeholder="Search by name or phone…" @input="searchCustomers" /><BaseButton type="button" variant="secondary" @click="useNewCustomer">New customer</BaseButton></div>
+          <p v-if="customerSearchLoading" class="trade-rate-status">Searching customers…</p>
+          <p v-else-if="customerSearchError" class="trade-rate-error" role="alert">{{ customerSearchError }}</p>
+          <div v-else-if="customerMatches.length" class="trade-customer-results"><button v-for="row in customerMatches" :key="customerId(row)" type="button" class="trade-customer-result" @click="selectCustomer(row)"><strong>{{ customerName(row) }}</strong><span>{{ row.phone_number || row.phone || 'No phone' }}</span></button></div>
+          <p v-if="selectedCustomerId" class="trade-customer-selected">Existing customer selected</p>
+        </div>
         <div class="module-form-grid">
           <div class="module-form-field"><BaseInput v-model="form.fullname" label="Full name" id="trade-customer-fullname" autocomplete="name" required /></div>
           <div class="module-form-field nationality-field">
@@ -421,7 +429,7 @@ async function submit() {
           </div>
           <div class="module-form-field"><BaseInput v-model="form.phone_number" label="Phone number" id="trade-customer-phone" type="tel" autocomplete="tel" required /></div>
           <div class="module-form-field"><BaseInput v-model="form.id_or_passport_number" label="ID or passport number" id="trade-customer-id" required /></div>
-          <template v-if="form.transaction_type === 'SELL'">
+          <template v-if="form.transaction_type === 'BUY' && !selectedCustomerId">
             <div class="module-form-field"><BaseInput v-model="form.city" label="City" id="trade-customer-city" required /></div>
             <div class="module-form-field"><BaseInput v-model="form.sub_city" label="Sub-city" id="trade-customer-sub-city" required /></div>
             <div class="module-form-field"><BaseInput v-model="form.wereda" label="Wereda" id="trade-customer-wereda" required /></div>
@@ -431,7 +439,7 @@ async function submit() {
       <section class="trade-form-section">
         <div class="trade-form-section-heading"><h3>Transaction details</h3></div>
         <div class="module-form-grid">
-
+          <div v-if="form.transaction_type === 'SELL'" class="module-form-field"><BaseInput v-model="sellPurpose" label="Sell purpose" id="trade-sell-purpose" placeholder="Travel" required /></div>
           <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required>
               <option value="CASH">Cash</option>
               <option value="BANK_TRANSFER">Bank transfer</option>
@@ -461,4 +469,5 @@ async function submit() {
 .selected-rate-conversion{margin-left:auto;text-align:right}.selected-rate-conversion span{font-size:.78rem;font-weight:650;color:var(--text-primary,#263449);white-space:nowrap}
 .selected-rate-change{padding:6px 10px;border:1px solid var(--border-color,#d9e0ea);border-radius:7px;background:transparent;color:var(--text-primary,#263449);font-size:.76rem;font-weight:650;cursor:pointer;white-space:nowrap}
 @media(max-width:640px){.selected-rate-summary{gap:9px;margin:0 14px 14px;padding:9px 10px;flex-wrap:wrap}.selected-rate-value{padding-left:9px}.selected-rate-value strong{font-size:.95rem}.selected-rate-conversion{margin-left:0;flex:1 1 100%;padding-top:7px;border-top:1px solid var(--border-color,#e5e9ef);text-align:left}.selected-rate-change{margin-left:auto}}
+.trade-customer-search{display:grid;gap:8px;margin:0 24px 20px}.trade-customer-search>label{font-size:.82rem;font-weight:700}.trade-customer-search-row{display:flex;gap:10px}.trade-customer-search-row input{flex:1;min-width:0}.trade-customer-results{display:grid;max-height:220px;overflow:auto;border:1px solid var(--border-color,#d9e0ea);border-radius:9px;background:var(--surface-color,#fff)}.trade-customer-result{display:flex;justify-content:space-between;gap:12px;padding:11px 13px;border:0;border-bottom:1px solid var(--border-color,#edf1f5);background:transparent;text-align:left;cursor:pointer}.trade-customer-result:hover{background:var(--surface-subtle,#f8fafc)}.trade-customer-result span,.trade-customer-selected{color:var(--text-muted,#778196);font-size:.78rem}.trade-customer-selected{margin:0;color:var(--brand-base-color,#16A34A)}@media(max-width:600px){.trade-customer-search{margin-left:16px;margin-right:16px}.trade-customer-search-row{flex-direction:column}}
 </style>
