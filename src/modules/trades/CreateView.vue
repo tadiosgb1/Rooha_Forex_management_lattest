@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiRequest } from '../../services/apiClient'
 import { forexTransactionService } from '../../services/forexTransactionService'
+import { customerService } from '../../services/customerService'
 import { rateService } from '../../services/rateService'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
@@ -28,6 +29,13 @@ const showTradeForm = ref(false)
 const currencyLines = ref([])
 const addCurrencyRateId = ref('')
 const currencyLineError = ref('')
+const customerSearch = ref('')
+const customerMatches = ref([])
+const customerSearchLoading = ref(false)
+const selectedCustomerId = ref('')
+const customerSearchError = ref('')
+const sellPurpose = ref('Travel')
+let customerSearchRequest = 0
 const form = reactive({
   fullname: '',
   nationality: 'Ethiopian',
@@ -69,6 +77,38 @@ function chooseCountry(country) {
   countryOpen.value = false
   countrySearch.value = ''
 }
+function customerId(row) { return row?.id ?? row?.customer_id ?? row?.customer_profile_id ?? row?.uuid ?? '' }
+function customerName(row) { return row?.fullname ?? [row?.first_name, row?.middle_name, row?.last_name].filter(Boolean).join(' ') }
+async function searchCustomers() {
+  const query = customerSearch.value.trim()
+  selectedCustomerId.value = ''
+  if (query.length < 2) { customerMatches.value = []; customerSearchError.value = ''; return }
+  const request = ++customerSearchRequest
+  customerSearchLoading.value = true
+  customerSearchError.value = ''
+  try {
+    const response = await customerService.list({ search: query, q: query })
+    if (request !== customerSearchRequest) return
+    customerMatches.value = records(response).filter(row => customerId(row))
+  } catch (error) {
+    if (request === customerSearchRequest) customerSearchError.value = error?.message || 'Unable to search customers.'
+  } finally {
+    if (request === customerSearchRequest) customerSearchLoading.value = false
+  }
+}
+function selectCustomer(row) {
+  selectedCustomerId.value = String(customerId(row))
+  customerSearch.value = customerName(row) || row?.phone_number || row?.phone || 'Selected customer'
+  customerMatches.value = []
+  form.fullname = customerName(row) || ''
+  form.nationality = row?.nationality || 'Ethiopian'
+  form.phone_number = row?.phone_number || row?.phone || ''
+  form.id_or_passport_number = row?.id_or_passport_number || row?.id_number || ''
+  form.city = row?.city || 'Addis Ababa'
+  form.sub_city = row?.sub_city || ''
+  form.wereda = row?.wereda || ''
+}
+function useNewCustomer() { selectedCustomerId.value = ''; customerSearch.value = ''; customerMatches.value = [] }
 const selectedRate = computed(() => exchangeRates.value.find(item => String(item?.id ?? '') === String(form.rate_id)) ?? null)
 const selectedCurrency = computed(() => selectedRate.value?.currency ?? null)
 const buyRate = computed(() => {
@@ -256,72 +296,25 @@ function openReceiptPreview() {
 
 async function submit() {
   if (saving.value) return
-  if (!selectedRate.value || !validateSelectedRate() || rateValue.value == null) {
-    toast.error('Select an approved exchange rate with a valid ' + form.transaction_type.toLowerCase() + ' price before submitting.')
-    return
-  }
-  const customer = {
-    fullname: form.fullname.trim(),
-    nationality: form.nationality.trim(),
-    phone_number: form.phone_number.trim(),
-    id_or_passport_number: form.id_or_passport_number.trim(),
-  }
-  if (form.transaction_type === 'SELL') {
-    customer.city = form.city.trim()
-    customer.sub_city = form.sub_city.trim()
-    customer.wereda = form.wereda.trim()
-  }
-  const currencies = currencyLineTotals.value.map(({ line, rate, price, amount }) => ({
-    currency_id: rate?.currency_id ?? rate?.currency?.id,
-    rate_id: rate?.id,
-    rate: price,
-    fcy_amount: amount,
-  }))
-  const payload = {
-    customer,
-    transaction_type: form.transaction_type,
-    currencies,
-    // Keep the first-line fields for compatibility with existing single-currency API consumers.
-    currency_id: currencies[0]?.currency_id,
-    rate: currencies[0]?.rate,
-    fcy_amount: currencies[0]?.fcy_amount,
-    payment_method: form.payment_method.trim().toUpperCase(),
-    service_fee: Number(form.service_fee),
-  }
-  if (!customer.fullname || !customer.nationality || !customer.phone_number || !customer.id_or_passport_number ||
-      !payload.currencies.length || !payload.payment_method ||
-      payload.currencies.some(line => !line.currency_id || !Number.isFinite(line.rate) || line.rate <= 0 || !Number.isFinite(line.fcy_amount) || line.fcy_amount <= 0) ||
-      !Number.isFinite(payload.service_fee) || payload.service_fee < 0) {
-    toast.error('Complete the customer, currency, payment and valid amount, rate and service fee fields.')
-    return
-  }
-  if (payload.transaction_type === 'SELL' && (!customer.city || !customer.sub_city || !customer.wereda)) {
-    toast.error('City, sub-city and wereda are required for SELL transactions.')
-    return
-  }
+  if (!currencyLines.value.length || currencyLineTotals.value.some(line => !line.rate || !line.price || !Number.isFinite(line.amount) || line.amount <= 0)) { toast.error('Add at least one currency and enter a valid amount for every currency.'); return }
+  if (!selectedCustomerId.value && (!form.fullname.trim() || !form.nationality.trim() || !form.phone_number.trim())) { toast.error('Select an existing customer or enter the new customer details.'); return }
+  if (form.transaction_type === 'BUY' && !selectedCustomerId.value && (!form.id_or_passport_number.trim() || !form.city.trim() || !form.sub_city.trim() || !form.wereda.trim())) { toast.error('For a new BUY customer, complete the ID/passport and address fields.'); return }
+  if (form.transaction_type === 'SELL' && !sellPurpose.trim()) { toast.error('Enter the purpose of the SELL transaction.'); return }
+  const trades = currencyLineTotals.value.map(({ rate, amount }) => ({ currency_id: rate?.currency_id ?? rate?.currency?.id, fcy_amount: amount }))
+  if (trades.some(trade => !trade.currency_id)) { toast.error('A selected exchange rate is missing its currency ID.'); return }
+  const payload = { ...(selectedCustomerId.value ? { customer_id: selectedCustomerId.value } : { customer: form.transaction_type === 'BUY' ? { fullname: form.fullname.trim(), nationality: form.nationality.trim(), phone_number: form.phone_number.trim(), id_or_passport_number: form.id_or_passport_number.trim(), city: form.city.trim(), sub_city: form.sub_city.trim(), wereda: form.wereda.trim() } : { fullname: form.fullname.trim(), nationality: form.nationality.trim(), phone_number: form.phone_number.trim() } }), transaction_type: form.transaction_type, payment_method: form.payment_method.trim().toUpperCase(), trades }
+  if (form.transaction_type === 'BUY') { payload.service_fee = Number(form.service_fee); if (!Number.isFinite(payload.service_fee) || payload.service_fee < 0) { toast.error('Enter a valid service fee.'); return } }
+  else payload.sell_purpose = sellPurpose.trim()
   saving.value = true
   try {
     const response = await forexTransactionService.create(payload)
     const record = response?.data?.transaction ?? response?.data?.forex_transaction ?? response?.data?.record ?? response?.data ?? response?.transaction ?? response?.forex_transaction ?? response?.record ?? response
     const transactionId = record?.id ?? record?.forex_transaction_id ?? record?.transaction_id ?? record?.uuid
     toast.success('Forex transaction recorded successfully. Your receipt is ready.')
-    if (transactionId != null && String(transactionId).trim()) {
-      router.push({ name: 'trades-receipt', params: { id: String(transactionId) } })
-    } else {
-      toast.error('The transaction was saved, but the API did not return an ID. Open the transaction register to print its receipt.')
-      router.push('/trades')
-    }
-  } catch (error) {
-    toast.error((error?.message || 'Unable to record forex transaction.') + ' Opening a local test receipt with the form data instead.')
-    try {
-      window.sessionStorage.setItem('rooha-forex-receipt-preview', JSON.stringify(buildPreviewTransaction()))
-      router.push({ name: 'trades-receipt', params: { id: 'preview' }, query: { preview: '1' } })
-    } catch (previewError) {
-      toast.error(previewError?.message || 'Could not open the local receipt preview.')
-    }
-  } finally {
-    saving.value = false
-  }
+    if (transactionId != null && String(transactionId).trim()) router.push({ name: 'trades-receipt', params: { id: String(transactionId) } })
+    else { toast.error('The transaction was saved, but the API did not return an ID. Open the transaction register to print its receipt.'); router.push('/trades') }
+  } catch (error) { toast.error(error?.message || 'Unable to record forex transaction.') }
+  finally { saving.value = false }
 }
 </script>
 
