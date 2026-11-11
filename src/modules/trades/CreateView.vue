@@ -81,9 +81,9 @@ function customerId(row) { return row?.id ?? row?.customer_id ?? row?.customer_p
 function customerName(row) { return row?.fullname ?? [row?.first_name, row?.middle_name, row?.last_name].filter(Boolean).join(' ') }
 async function searchCustomers() {
   const query = customerSearch.value.trim()
-  selectedCustomerId.value = ''
-  if (query.length < 2) { customerMatches.value = []; customerSearchError.value = ''; return }
   const request = ++customerSearchRequest
+  selectedCustomerId.value = ''
+  if (query.length < 2) { customerMatches.value = []; customerSearchError.value = ''; customerSearchLoading.value = false; return }
   customerSearchLoading.value = true
   customerSearchError.value = ''
   try {
