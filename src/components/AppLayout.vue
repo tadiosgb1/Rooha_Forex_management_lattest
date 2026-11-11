@@ -62,10 +62,11 @@ const navGroups = [
     ],
   },
   {
-    id: 'accounting-ledger', label: 'Accounting Ledger', icon: '₿',
+    id: 'accounting', label: 'Accounting', icon: '▤',
     items: [
-      { label: 'Ledger Entries', to: '/accounting', icon: '₿', permission: 'forex_journal_entries.view' },
-      { label: 'New Journal Entry', to: '/accounting/new', icon: '+', permission: [] },
+      { label: 'Charts of accounts', to: '/accounting/accounts', icon: '▦', permission: 'forex_journal_entries.view' },
+      { label: 'Journal entry', to: '/accounting/journal', icon: '≡', permission: 'forex_journal_entries.view' },
+      { label: 'Reports', to: '/accounting/reports', icon: '▥', permission: 'forex_journal_entries.view' },
     ],
   },
 ]
