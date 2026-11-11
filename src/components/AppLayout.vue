@@ -55,10 +55,22 @@ const navGroups = [
     ],
   },
   {
-    id: 'transaction-reports', label: 'Transactions report', icon: '▤',
+    id: 'transaction-reports', label: 'Receipt Generator', icon: '▤',
     items: [
       { label: 'Buy transactions report', to: '/transaction-reports/buy', icon: '↗', permission: ['forex_transactions.view', 'forex_transactions.read'] },
       { label: 'Sell transactions report', to: '/transaction-reports/sell', icon: '↘', permission: ['forex_transactions.view', 'forex_transactions.read'] },
+    ],
+  },
+  {
+    id: 'system-settings', label: 'System Settings', icon: '⚙',
+    items: [
+      { label: 'Banks List', to: '/system-settings/banks', icon: '▦', permission: 'system-config:read' },
+      { label: 'Fiscal Year', to: '/system-settings/fiscal-year', icon: '◷', permission: 'system-config:read' },
+      { label: 'Permit Number', to: '/system-settings/permit-number', icon: '№', permission: 'system-config:read' },
+      { label: 'Reversed PN', to: '/system-settings/reversed-pn', icon: '↶', permission: 'system-config:read' },
+      { label: 'VAT Settings', to: '/system-settings/vat', icon: '%', permission: 'system-config:read' },
+      { label: 'Spread Settings', to: '/system-settings/spread', icon: '⇄', permission: 'system-config:read' },
+      { label: 'Capital Mgt', to: '/system-settings/capital-management', icon: '◈', permission: 'system-config:read' },
     ],
   },
   {
