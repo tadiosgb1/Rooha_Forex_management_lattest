@@ -49,7 +49,7 @@ const form = reactive({
   transaction_type: 'BUY',
   payment_method: 'CASH',
   service_fee: '0',
-  fcy_amount: '0',
+  fcy_amount: '',
 })
 
 function records(response) {
@@ -141,8 +141,8 @@ function currencyCode() {
 function openRateForTrade(rate) {
   form.rate_id = String(rate?.id ?? '')
   form.transaction_type = activeTab.value
-  form.fcy_amount = '0'
-  currencyLines.value = [{ rate_id: form.rate_id, fcy_amount: '0' }]
+  form.fcy_amount = ''
+  currencyLines.value = [{ rate_id: form.rate_id, fcy_amount: '' }]
   addCurrencyRateId.value = ''
   currencyLineError.value = ''
   showTradeForm.value = true
@@ -171,7 +171,7 @@ function addCurrencyLine() {
     currencyLineError.value = 'Choose an approved currency with a valid transaction rate.'
     return
   }
-  currencyLines.value.push({ rate_id: String(rate.id), fcy_amount: '0' })
+  currencyLines.value.push({ rate_id: String(rate.id), fcy_amount: '' })
   addCurrencyRateId.value = ''
   currencyLineError.value = ''
 }
