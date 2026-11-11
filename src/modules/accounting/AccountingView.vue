@@ -13,7 +13,7 @@ const accountSeed = [
 ]
 const journalSeed = [
   { id: 1, reference: 'JV-2026-001', date: '2026-11-01', description: 'Opening bank balances', accountCode: '1000-04', accountName: 'Bunna Bank', debit: 250000, credit: 0, status: 'POSTED' },
-  { id: 2, reference: 'JV-2026-001', date: '2026-11-01', description: 'Opening bank balances', accountCode: '3000-01', accountName: 'Opening Balance Equity', debit: 0, credit: 250000, status: 'POSTED' },
+  { id: 2, reference: 'JV-2026-001', date: '2026-11-01', description: 'Opening bank balances', accountCode: '1000-05', accountName: 'Dashen Bank', debit: 0, credit: 250000, status: 'POSTED' },
   { id: 3, reference: 'JV-2026-002', date: '2026-11-04', description: 'Cash transfer to Dashen Bank', accountCode: '1000-05', accountName: 'Dashen Bank', debit: 75000, credit: 0, status: 'DRAFT' },
   { id: 4, reference: 'JV-2026-002', date: '2026-11-04', description: 'Cash transfer from Bunna Bank', accountCode: '1000-04', accountName: 'Bunna Bank', debit: 0, credit: 75000, status: 'DRAFT' },
 ]
