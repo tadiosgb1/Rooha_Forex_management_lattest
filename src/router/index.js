@@ -36,7 +36,10 @@ const routes = [
   { path: '/reversals/new', name: 'reversals-create', component: () => import('../modules/reversals/CreateView.vue'), meta: { title: 'Create Reversal request' } },
   { path: '/reversals/:id/edit', name: 'reversals-edit', component: () => import('../modules/reversals/EditView.vue'), meta: { title: 'Edit Reversal request' } },
   { path: '/reversals/:id', name: 'reversals-detail', component: () => import('../modules/reversals/DetailView.vue'), meta: { title: 'Reversal request Details' } },
-  { path: '/accounting', name: 'accounting', component: () => import('../modules/accounting/ListView.vue'), meta: { title: 'Accounting Ledger' } },
+  { path: '/accounting', redirect: '/accounting/accounts' },
+  { path: '/accounting/accounts', name: 'accounting-accounts', component: () => import('../modules/accounting/AccountsView.vue'), meta: { title: 'Charts of accounts' } },
+  { path: '/accounting/journal', name: 'accounting-journal', component: () => import('../modules/accounting/JournalView.vue'), meta: { title: 'Journal entry' } },
+  { path: '/accounting/reports', name: 'accounting-reports', component: () => import('../modules/accounting/ReportsView.vue'), meta: { title: 'Accounting reports' } },
   { path: '/accounting/new', name: 'accounting-create', component: () => import('../modules/accounting/CreateView.vue'), meta: { title: 'Create Journal entry' } },
   { path: '/accounting/:id/edit', name: 'accounting-edit', component: () => import('../modules/accounting/EditView.vue'), meta: { title: 'Edit Journal entry' } },
   { path: '/accounting/:id', name: 'accounting-detail', component: () => import('../modules/accounting/DetailView.vue'), meta: { title: 'Journal entry Details' } },
@@ -75,7 +78,7 @@ const routePermissionMap = {
     'buy-transactions-report': ['forex_transactions.view', 'forex_transactions.read'], 'sell-transactions-report': ['forex_transactions.view', 'forex_transactions.read'], 'trades-create': ['forex_transactions.create', 'forex_transactions:create'], 'trades-edit': [], 'trades-detail': ['forex_transactions.view', 'forex_transactions.read'], 'trades-receipt': ['forex_transactions.receipt.view', 'forex_transactions.view', 'forex_transactions.read', 'forex_transactions.create', 'forex_transactions:create'],
     inventory: ['forex_inventory.view'], 'inventory-create': [], 'inventory-edit': [], 'inventory-detail': ['forex_inventory.view'],
     reversals: ['forex_transactions.receipt.view', 'forex_transactions.view', 'forex_transactions.read'], 'reversals-create': ['forex_transactions.reverse'], 'reversals-edit': [], 'reversals-detail': ['forex_transactions.receipt.view', 'forex_transactions.view'],
-    accounting: ['forex_journal_entries.view'], 'accounting-create': [], 'accounting-edit': [], 'accounting-detail': ['forex_journal_entries.view'],
+    'accounting-accounts': ['forex_journal_entries.view'], 'accounting-journal': ['forex_journal_entries.view'], 'accounting-reports': ['forex_journal_entries.view'],
     'platform-brands': ['system-config:read', 'system-config:update'],
   }
 function routePermissions(to) {
