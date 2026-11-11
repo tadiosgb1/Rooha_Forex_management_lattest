@@ -36,9 +36,6 @@ const administrationItems = [
   { label: 'Permissions', to: '/permissions', icon: '▤', permission: 'permissions:read' },
   { label: 'Platform Brands', to: '/platform-brands', icon: '◐', permission: 'system-config:read' },
 ]
-const tradingDeskItems = [
-  { label: 'All Trades', to: '/trades', icon: '⇄', permission: ['forex_transactions.view', 'forex_transactions.read'] },
-]
 const navGroups = [
   { id: 'dashboard', label: 'Dashboard', standalone: true, items: [{ label: 'Dashboard', to: '/', icon: '⌂' }] },
   { id: 'administration', label: 'Administration', icon: '⚙', items: administrationItems },
@@ -57,19 +54,11 @@ const navGroups = [
       { label: 'Service Fee', to: '/service-fees', icon: '%', permission: 'service-fees:read' },
     ],
   },
-  { id: 'receipt-generator', label: 'Receipt Generator', icon: '▤', items: tradingDeskItems },
   {
-    id: 'fx-inventory', label: 'FX Inventory / FIFO', icon: '◈',
+    id: 'transaction-reports', label: 'Transactions report', icon: '▤',
     items: [
-      { label: 'All Inventory Lots', to: '/inventory', icon: '◈', permission: 'forex_inventory.view' },
-      { label: 'Add Inventory Lot', to: '/inventory/new', icon: '+', permission: [] },
-    ],
-  },
-  {
-    id: 'reversals-receipts', label: 'Reversals & Receipts', icon: '↩',
-    items: [
-      { label: 'All Reversal Requests', to: '/reversals', icon: '↩', permission: ['forex_transactions.receipt.view', 'forex_transactions.view', 'forex_transactions.read'] },
-      { label: 'Create Reversal', to: '/reversals/new', icon: '+', permission: 'forex_transactions.reverse' },
+      { label: 'Buy transactions report', to: '/transaction-reports/buy', icon: '↗', permission: ['forex_transactions.view', 'forex_transactions.read'] },
+      { label: 'Sell transactions report', to: '/transaction-reports/sell', icon: '↘', permission: ['forex_transactions.view', 'forex_transactions.read'] },
     ],
   },
   {
