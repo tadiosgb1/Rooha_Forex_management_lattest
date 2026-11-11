@@ -80,7 +80,7 @@ async function loadTransactions() {
   error.value = ''
   try {
     // Each report requests its selected status from the shared forex-transactions endpoint.
-    const response = await forexTransactionService.list({ status: status.value })
+    const response = await forexTransactionService.list(status.value === 'all' ? {} : { status: status.value })
     transactions.value = unwrap(response)
   } catch (err) {
     transactions.value = []
@@ -88,7 +88,10 @@ async function loadTransactions() {
   } finally { loading.value = false }
 }
 function setStatus(nextStatus) {
-  router.replace({ query: { ...route.query, status: nextStatus } })
+  const query = { ...route.query }
+  if (nextStatus === 'all') delete query.status
+  else query.status = nextStatus
+  router.replace({ query })
 }
 watch(status, loadTransactions)
 onMounted(loadTransactions)
@@ -109,11 +112,11 @@ onMounted(loadTransactions)
     <BaseCard as="section" class="module-panel">
       <div class="module-panel-header"><h3>{{ title }}</h3><label class="module-search"><span>⌕</span><BaseInput v-model="search" placeholder="Search transactions…" aria-label="Search transactions" size="sm" /></label></div>
       <div v-if="error" class="report-error" role="alert"><span>{{ error }}</span><BaseButton variant="secondary" size="sm" @click="loadTransactions">Try again</BaseButton></div>
-      <p v-else-if="loading" class="report-state">Loading {{ transactionType }} transactions from /forex-transactions?status={{ status }}…</p>
+      <p v-else-if="loading" class="report-state">Loading {{ transactionType }} transactions from /forex-transactions{{ status === 'all' ? '' : '?status=' + status }}…</p>
       <p v-else-if="!filteredRows.length" class="report-state">No {{ transactionType }} transactions found for status “{{ status }}”.</p>
       <BaseTable v-else :columns="columns" :rows="filteredRows" row-key="id" wrapper-class="module-table-wrap" table-class="module-table" empty-title="No matching transactions" empty-message="Try a different search.">
         <template #cell="{ column, value }">
-          <BaseBadge v-if="column.key === 'status'" tone="neutral" class="module-status-chip">{{ value || '—' }}</BaseBadge>
+          <BaseBadge v-if="column.key === 'status'" :tone="String(value).toLowerCase() === 'approved' ? 'success' : String(value).toLowerCase() === 'pending' ? 'warning' : String(value).toLowerCase() === 'rejected' ? 'danger' : 'neutral'" class="module-status-chip">{{ value || '—' }}</BaseBadge>
           <span v-else-if="column.key === 'amount' || column.key === 'rate'">{{ formatNumber(value) }}</span>
           <strong v-else-if="column.key === 'etbAmount'">{{ value == null ? '—' : formatNumber(value) + ' ETB' }}</strong>
           <span v-else-if="column.key === 'created'">{{ formatDate(value) }}</span>
