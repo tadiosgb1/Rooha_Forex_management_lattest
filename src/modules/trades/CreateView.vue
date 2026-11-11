@@ -373,7 +373,7 @@ async function submit() {
       <div class="trade-workspace">
         <div class="trade-workspace-main">
       <section class="trade-form-section">
-        <div class="trade-form-section-heading"><h3>Currency lines</h3><p>Add one or more currencies to this transaction. Each currency uses its selected approved rate.</p></div>
+        <div class="trade-form-section-heading"><h3>Currency lines</h3><p>Enter an amount for each currency in this transaction.</p></div>
         <div class="trade-currency-lines">
           <div v-for="(line, index) in currencyLines" :key="line.rate_id" class="trade-currency-line">
             <div class="trade-currency-line-heading">
@@ -402,7 +402,7 @@ async function submit() {
         </div>
       </section>
       <section class="trade-form-section">
-        <div class="trade-form-section-heading"><h3>Transaction details</h3></div>
+        <div class="trade-form-section-heading"><h3>Transaction details</h3><p>Confirm how this transaction will be processed.</p></div>
         <div class="module-form-grid">
           <div v-if="form.transaction_type === 'SELL'" class="module-form-field"><BaseInput v-model="sellPurpose" label="Sell purpose" id="trade-sell-purpose" placeholder="Travel" required /></div>
           <div class="module-form-field"><label for="payment-method">Payment method</label><select id="payment-method" v-model="form.payment_method" class="ui-input" required>
@@ -411,13 +411,13 @@ async function submit() {
               <option value="MOBILE_MONEY">Mobile money</option>
               <option value="CARD">Card</option>
             </select></div>
-          <div class="module-form-field"><BaseInput v-model="form.service_fee" label="Service fee (%)" id="trade-service-fee" type="number" min="0" step="any" required /><p v-if="serviceFeeLoading" class="trade-rate-status">Loading fee…</p><p v-else-if="serviceFeeError" class="trade-rate-error" role="status">{{ serviceFeeError }}</p></div>
+          <div v-if="form.transaction_type === 'BUY'" class="module-form-field"><BaseInput v-model="form.service_fee" label="Service fee (%)" id="trade-service-fee" type="number" min="0" step="any" required /><p v-if="serviceFeeLoading" class="trade-rate-status">Loading fee…</p><p v-else-if="serviceFeeError" class="trade-rate-error" role="status">{{ serviceFeeError }}</p></div>
         </div>
       </section>
         </div>
         <aside class="trade-workspace-customer" aria-label="Customer information">
       <section class="trade-form-section">
-        <div class="trade-form-section-heading"><h3>Customer details</h3><p>Search for an existing customer or enter a new customer below.</p></div>
+        <div class="trade-form-section-heading"><h3>Customer details</h3><p>Find a customer or enter their details.</p></div>
         <div class="trade-customer-search">
           <label for="trade-customer-search">Find existing customer</label>
           <div class="trade-customer-search-row"><input id="trade-customer-search" v-model="customerSearch" class="ui-input" type="search" placeholder="Search by name or phone…" @input="searchCustomers" /><BaseButton type="button" variant="secondary" @click="useNewCustomer">New customer</BaseButton></div>
@@ -476,4 +476,81 @@ async function submit() {
 .selected-rate-change{padding:6px 10px;border:1px solid var(--border-color,#d9e0ea);border-radius:7px;background:transparent;color:var(--text-primary,#263449);font-size:.76rem;font-weight:650;cursor:pointer;white-space:nowrap}
 @media(max-width:640px){.selected-rate-summary{gap:9px;margin:0 14px 14px;padding:9px 10px;flex-wrap:wrap}.selected-rate-value{padding-left:9px}.selected-rate-value strong{font-size:.95rem}.selected-rate-conversion{margin-left:0;flex:1 1 100%;padding-top:7px;border-top:1px solid var(--border-color,#e5e9ef);text-align:left}.selected-rate-change{margin-left:auto}}
 .trade-workspace{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.85fr);align-items:start;gap:22px;padding:0 24px}.trade-workspace-main,.trade-workspace-customer{min-width:0}.trade-workspace-main .trade-form-section,.trade-workspace-customer .trade-form-section{padding-left:0;padding-right:0}.trade-workspace-main .trade-form-section:last-child,.trade-workspace-customer .trade-form-section:last-child{margin-bottom:0}.trade-workspace-customer{position:sticky;top:16px;padding:18px;border:1px solid var(--border-color,#e1e7ef);border-radius:12px;background:var(--surface-color,#fff)}.trade-workspace-customer .trade-customer-search{margin-left:0;margin-right:0}.trade-workspace-customer .module-form-grid{grid-template-columns:1fr}.trade-workspace-customer .trade-form-section{border-bottom:0;margin-bottom:0;padding-bottom:0}.trade-workspace-customer .trade-form-section-heading{margin-bottom:12px}.trade-customer-search{display:grid;gap:8px;margin:0 24px 20px}.trade-customer-search>label{font-size:.82rem;font-weight:700}.trade-customer-search-row{display:flex;gap:10px}.trade-customer-search-row input{flex:1;min-width:0}.trade-customer-results{display:grid;max-height:220px;overflow:auto;border:1px solid var(--border-color,#d9e0ea);border-radius:9px;background:var(--surface-color,#fff)}.trade-customer-result{display:flex;justify-content:space-between;gap:12px;padding:11px 13px;border:0;border-bottom:1px solid var(--border-color,#edf1f5);background:transparent;text-align:left;cursor:pointer}.trade-customer-result:hover{background:var(--surface-subtle,#f8fafc)}.trade-customer-result span,.trade-customer-selected{color:var(--text-muted,#778196);font-size:.78rem}.trade-customer-selected{margin:0;color:var(--brand-base-color,#16A34A)}@media(max-width:600px){.trade-customer-search{margin-left:16px;margin-right:16px}.trade-customer-search-row{flex-direction:column}}
+
+/* Trading desk visual polish: consistent controls, calmer spacing and clearer hierarchy. */
+.trading-desk-form{padding:22px 0 8px}
+.trade-workspace{gap:24px;padding:0 26px 8px}
+.trade-workspace-main,.trade-workspace-customer{min-width:0}
+.trade-workspace-main .trade-form-section{padding:0 0 22px;margin:0 0 22px;border-bottom:1px solid var(--border-color,#e5e9ef)}
+.trade-workspace-main .trade-form-section:last-child{margin-bottom:0}
+.trade-workspace-customer{padding:22px;background:var(--surface-subtle,#f8fafc);border-color:var(--border-color,#e1e7ef);box-shadow:0 2px 10px rgba(25,40,65,.035)}
+.trade-form-section-heading{display:flex;flex-direction:column;gap:5px;margin-bottom:16px}
+.trade-form-section-heading h3{font-size:1.02rem;line-height:1.35;font-weight:750;letter-spacing:-.01em;color:var(--text-primary,#263449)}
+.trade-form-section-heading p{margin:0;font-size:.8rem;line-height:1.45;color:var(--text-muted,#778196)}
+.trade-workspace :deep(.ui-field){display:flex;flex-direction:column;gap:7px;width:100%;min-width:0;margin:0}
+.trade-workspace :deep(.ui-field-label),.trade-workspace .trade-customer-search>label,.trade-workspace .trade-add-currency>label,.trade-workspace .module-form-field>label{display:block;min-height:18px;margin:0;font-size:.78rem;line-height:1.25;font-weight:700;letter-spacing:.01em;color:var(--text-primary,#344054)}
+.trade-workspace :deep(.ui-input),.trade-workspace .ui-input{box-sizing:border-box;width:100%;height:44px;min-height:44px;padding:0 12px;border:1px solid var(--border-color,#d6dde7);border-radius:8px;background:var(--surface-color,#fff);color:var(--text-primary,#263449);font:inherit;font-size:.88rem;line-height:1.2;box-shadow:none;transition:border-color .15s,box-shadow .15s}
+.trade-workspace :deep(.ui-input:focus),.trade-workspace .ui-input:focus{outline:none;border-color:var(--brand-base-color,#16A34A);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-base-color,#16A34A) 14%,transparent)}
+.trade-workspace :deep(.ui-input::placeholder),.trade-workspace .ui-input::placeholder{color:#98a2b3}
+.trade-workspace .nationality-trigger{display:flex;align-items:center;justify-content:space-between;text-align:left}
+.trade-workspace .module-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:16px}
+.trade-workspace-customer .module-form-grid{grid-template-columns:1fr;gap:14px}
+.trade-workspace .module-form-field{display:flex;flex-direction:column;justify-content:flex-start;gap:7px;min-width:0;margin:0}
+.trade-customer-search{gap:8px;margin:0 0 18px}
+.trade-customer-search-row{align-items:stretch;gap:8px}
+.trade-customer-search-row .ui-input{flex:1 1 auto;min-width:0}
+.trade-customer-search-row :deep(button){flex:0 0 auto;min-height:44px;white-space:nowrap}
+.trade-customer-results{margin-top:2px;box-shadow:0 4px 12px rgba(25,40,65,.05)}
+.trade-customer-result{align-items:center;min-height:48px;padding:10px 12px}
+.trade-customer-result strong{font-size:.84rem;line-height:1.35;color:var(--text-primary,#263449)}
+.trade-customer-result span{font-size:.76rem;white-space:nowrap}
+.trade-customer-selected{padding:9px 11px;border-radius:7px;background:color-mix(in srgb,var(--brand-base-color,#16A34A) 9%,var(--surface-color,#fff));font-weight:650}
+.trade-currency-lines{gap:10px}
+.trade-currency-line{grid-template-columns:minmax(0,1fr) minmax(170px,230px) minmax(110px,auto);align-items:center;gap:16px;padding:14px 16px;background:var(--surface-color,#fff)}
+.trade-currency-line-heading{gap:5px}
+.trade-currency-line-heading strong{font-size:.92rem;font-weight:750}
+.trade-currency-line-heading span{font-size:.74rem;line-height:1.35}
+.trade-currency-line .module-form-field{margin:0}
+.trade-currency-line-total{gap:4px;align-self:center}
+.trade-currency-line-total strong{font-size:.9rem}
+.trade-add-currency{padding:15px;background:var(--surface-subtle,#fafbfc)}
+.trade-add-currency-controls{align-items:center;gap:9px}
+.trade-add-currency-controls select{min-width:0}
+.trade-currency-grand-total{margin-top:2px;padding:15px 16px;border:1px solid var(--border-color,#e5e9ef);background:var(--surface-subtle,#f5f8fa)}
+.trade-currency-grand-total span{font-size:.84rem;color:var(--text-primary,#344054)}
+.trade-currency-grand-total strong{font-size:1.12rem}
+.trade-workspace-customer .trade-form-section-heading{margin-bottom:15px}
+.trade-rate-feedback{margin:16px 26px}
+.trading-desk-form .module-form-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 26px 18px;border-top:1px solid var(--border-color,#e5e9ef)}
+.selected-rate-summary{margin:0 26px 20px;padding:13px 16px;min-height:68px}
+@media(max-width:900px){
+ .trade-workspace{gap:16px;padding:0 18px 8px}
+ .trade-workspace-customer{padding:17px}
+ .trade-currency-line{grid-template-columns:minmax(0,1fr) minmax(150px,210px);gap:12px}
+ .trade-currency-line-total{grid-column:2;justify-self:start}
+}
+@media(max-width:700px){
+ .trade-workspace{grid-template-columns:1fr;gap:18px;padding:0 14px 8px}
+ .trade-workspace-main{order:1}
+ .trade-workspace-customer{order:2;position:static;padding:17px}
+ .trade-workspace-customer .module-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .trade-workspace .module-form-grid{gap:13px}
+ .trade-currency-line{grid-template-columns:minmax(0,1fr) minmax(140px,1fr)}
+ .trade-rate-feedback{margin:14px}
+ .trading-desk-form .module-form-footer{padding:14px;flex-wrap:wrap}
+ .selected-rate-summary{margin:0 14px 16px}
+}
+@media(max-width:520px){
+ .trade-workspace{padding:0 12px 8px}
+ .trade-workspace-customer .module-form-grid,.trade-workspace .module-form-grid{grid-template-columns:1fr}
+ .trade-currency-line{grid-template-columns:1fr;align-items:stretch}
+ .trade-currency-line-total{grid-column:auto}
+ .trade-add-currency-controls{align-items:stretch;flex-direction:column}
+ .trade-customer-search-row{flex-direction:column}
+ .trade-customer-search-row :deep(button){width:100%}
+ .trade-workspace-customer{padding:15px}
+ .trade-form-section-heading{margin-bottom:13px}
+ .trading-desk-form .module-form-footer>div{display:flex;flex-wrap:wrap;gap:8px}
+}
+
 </style>
