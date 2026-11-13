@@ -85,7 +85,7 @@ const routePermissionMap = {
     inventory: ['forex_inventory.view'], 'inventory-create': [], 'inventory-edit': [], 'inventory-detail': ['forex_inventory.view'],
     reversals: ['forex_transactions.receipt.view', 'forex_transactions.view', 'forex_transactions.read'], 'reversals-create': ['forex_transactions.reverse'], 'reversals-edit': [], 'reversals-detail': ['forex_transactions.receipt.view', 'forex_transactions.view'],
     'settings-banks': ['system-config:read', 'system-config:update'], 'settings-dynamic': ['system-config:read', 'system-config:update'], 'settings-fiscal-year': ['system-config:read', 'system-config:update'], 'settings-permit-number': ['system-config:read', 'system-config:update'], 'settings-reversed-pn': ['system-config:read', 'system-config:update'], 'settings-vat': ['system-config:read', 'system-config:update'], 'settings-spread': ['system-config:read', 'system-config:update'], 'settings-capital-management': ['system-config:read', 'system-config:update'],
-    'accounting-accounts': ['forex_journal_entries.view'], 'accounting-journal': ['forex_journal_entries.view'], 'accounting-reports': ['forex_journal_entries.view'],
+    'accounting-accounts': [''], 'accounting-journal': [''], 'accounting-reports': [''],
     'platform-brands': ['system-config:read', 'system-config:update'],
   }
 function routePermissions(to) {
@@ -97,7 +97,7 @@ router.beforeEach((to) => {
   if (to.name === 'login' && isSignedIn) return { name: 'dashboard' }
   if (isSignedIn) {
     const required = routePermissions(to)
-    if (Object.prototype.hasOwnProperty.call(routePermissionMap, String(to.name || '')) && (!required.length || !required.some(hasPermission))) return { name: 'dashboard', query: { accessDenied: '1' } }
+    if (Object.prototype.hasOwnProperty.call(routePermissionMap, String(to.name || '')) && (!required.length || !required.some((permission) => !permission || hasPermission(permission)))) return { name: 'dashboard', query: { accessDenied: '1' } }
   }
   return true
 })
