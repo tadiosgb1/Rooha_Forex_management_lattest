@@ -20,7 +20,7 @@ const search = ref('')
 const dateRange = ref({ preset: '30' })
 const statuses = ['all', 'pending', 'approved', 'rejected']
 const status = computed(() => statuses.includes(String(route.query.status || 'all').toLowerCase()) ? String(route.query.status || 'all').toLowerCase() : 'all')
-const canCreate = computed(() => hasAnyPermission(['forex_transactions.create', 'forex_transactions:create']))
+const canCreate = computed(() => hasAnyPermission(['forex_transactions:create', 'forex_transactions:create']))
 const title = computed(() => props.transactionType === 'BUY' ? 'Buy transactions report' : 'Sell transactions report')
 const columns = [
   { key: 'reference', label: 'Transaction' }, { key: 'customer', label: 'Customer' },
