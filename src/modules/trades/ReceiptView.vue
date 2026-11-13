@@ -40,32 +40,45 @@ function money(value, digits = 2) {
 }
 const rows = computed(() => {
   const row = transaction.value || {}
-  const source = row.currencies ?? row.currency_lines ?? row.transaction_currencies ?? row.items ?? row.details
+  // The receipt API returns one transaction with its individual currency lines in "trades".
+  const source = row.trades ?? row.currencies ?? row.currency_lines ?? row.transaction_currencies ?? row.items ?? row.details
   if (Array.isArray(source) && source.length) {
     return source.map((item, index) => {
-      const currency = item.currency && typeof item.currency === 'object' ? item.currency : item.reference_currency || {}
+      const currency = item.currency && typeof item.currency === 'object'
+        ? item.currency
+        : item.reference_currency || {}
       const code = first(currency.code, currency.currency_code, item.currency_code, item.currency_name, item.currency_id)
-      const amount = Number(first(item.fcy_amount, item.foreign_amount, item.amount, 0))
-      const rate = Number(first(item.applied_rate, item.exchange_rate, item.rate, 0))
-      const local = Number(first(item.etb_amount, item.local_amount, item.lc_amount, amount * rate))
-      return { number: index + 1, currency: code, type: first(item.transaction_type, row.transaction_type, row.direction, 'BUY'), amount, rate, local }
+      const amount = Number(item.fcy_amount ?? item.foreign_amount ?? item.amount ?? 0)
+      const rate = Number(item.applied_rate ?? item.exchange_rate ?? item.rate ?? 0)
+      const local = Number(item.total_amount_etb ?? item.etb_amount ?? item.local_amount ?? item.lc_amount ?? (amount * rate))
+      return {
+        number: index + 1,
+        currency: code,
+        type: first(item.transaction_type, row.transaction_type, row.direction, row.type, 'BUY'),
+        amount,
+        rate,
+        local,
+      }
     })
   }
   const currency = row.currency && typeof row.currency === 'object' ? row.currency : row.reference_currency || {}
-  const amount = Number(first(row.fcy_amount, row.foreign_amount, row.amount, row.transaction_amount, 0))
-  const rate = Number(first(row.applied_rate, row.exchange_rate, row.rate, 0))
+  const amount = Number(row.fcy_amount ?? row.foreign_amount ?? row.amount ?? row.transaction_amount ?? 0)
+  const rate = Number(row.applied_rate ?? row.exchange_rate ?? row.rate ?? 0)
   return [{
     number: 1,
     currency: first(currency.code, currency.currency_code, row.currency_code, row.currency_name, row.currency_id),
     type: first(row.transaction_type, row.direction, row.type, 'BUY'),
     amount,
     rate,
-    local: Number(first(row.etb_amount, row.local_amount, row.total_etb, amount * rate)),
+    local: Number(row.total_amount_etb ?? row.etb_amount ?? row.local_amount ?? row.total_etb ?? (amount * rate)),
   }]
 })
 const totalEtb = computed(() => {
-  const explicit = Number(transaction.value?.total_etb ?? transaction.value?.etb_amount ?? transaction.value?.local_amount)
-  return Number.isFinite(explicit) && explicit > 0 ? explicit : rows.value.reduce((sum, item) => sum + (Number.isFinite(item.local) ? item.local : 0), 0)
+  const row = transaction.value || {}
+  const explicit = Number(row.total_amount_etb ?? row.total_etb ?? row.etb_amount ?? row.local_amount)
+  return Number.isFinite(explicit) && explicit > 0
+    ? explicit
+    : rows.value.reduce((sum, item) => sum + (Number.isFinite(item.local) ? item.local : 0), 0)
 })
 function amountInWordsFor(input) {
   const value = Math.round(Number(input || 0) * 100) / 100
@@ -166,7 +179,7 @@ onMounted(load)
         <p>{{ error }}</p><BaseButton variant="secondary" @click="load">Try again</BaseButton>
       </div>
       <div v-else-if="transaction" class="receipt-copies">
-        <article v-for="item in rows" :key="item.number" class="voucher-copy">
+        <article class="voucher-copy">
           <header class="voucher-header">
             <div class="voucher-brand">
               <h1>ROOHA FOREX BUREAU</h1>
@@ -181,10 +194,15 @@ onMounted(load)
           </div>
           <table class="voucher-table">
             <thead><tr><th>SL NO</th><th>CURRENCY</th><th>FC TYPE</th><th>FC AMOUNT</th><th>RATE</th><th>LC AMOUNT (ETB)</th></tr></thead>
-            <tbody><tr><td>1</td><td>{{ item.currency }}</td><td>{{ item.type }}</td><td>{{ money(item.amount) }}</td><td>{{ money(item.rate, 4) }}</td><td>{{ money(item.local) }}</td></tr></tbody>
-            <tfoot><tr><td colspan="5">Total Amount (ETB)</td><td>{{ money(item.local) }}</td></tr></tfoot>
+            <tbody>
+              <tr v-for="item in rows" :key="item.number">
+                <td>{{ item.number }}</td><td>{{ item.currency }}</td><td>{{ item.type }}</td>
+                <td>{{ money(item.amount) }}</td><td>{{ money(item.rate, 4) }}</td><td>{{ money(item.local) }}</td>
+              </tr>
+            </tbody>
+            <tfoot><tr><td colspan="5">Total Amount (ETB)</td><td>{{ money(totalEtb) }}</td></tr></tfoot>
           </table>
-          <p class="voucher-words"><strong>Amount in Words:</strong> {{ amountInWordsFor(item.local) }}</p>
+          <p class="voucher-words"><strong>Amount in Words:</strong> {{ amountInWordsFor(totalEtb) }}</p>
           <div class="voucher-parties">
             <div><span>Teller Name</span><strong>{{ details.teller }}</strong></div>
             <div><span>Customer Name</span><strong>{{ details.customer }}</strong></div>
