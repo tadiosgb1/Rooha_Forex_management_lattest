@@ -17,7 +17,7 @@ const error = ref('')
 const transactions = ref([])
 const search = ref('')
 const dateRange = ref({ preset: '30' })
-const canCreate = computed(() => hasAnyPermission(['forex_transactions.create', 'forex_transactions:create']))
+const canCreate = computed(() => hasAnyPermission(['forex_transactions:create', 'forex_transactions:create']))
 
 const columns = [
   { key: 'reference', label: 'Transaction' },
