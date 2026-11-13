@@ -20,7 +20,8 @@ const search = ref('')
 const dateRange = ref({ preset: '30' })
 const statuses = ['all', 'pending', 'approved', 'rejected']
 const status = computed(() => statuses.includes(String(route.query.status || 'all').toLowerCase()) ? String(route.query.status || 'all').toLowerCase() : 'all')
-const canCreate = computed(() => hasAnyPermission(['forex_transactions:create', 'forex_transactions:create']))
+const canViewReport = computed(() => hasAnyPermission(['forex_transactions:view', 'forex_transactions:read']))
+const canCreate = computed(() => hasAnyPermission(['forex_transactions:create']))
 const title = computed(() => props.transactionType === 'BUY' ? 'Buy transactions report' : 'Sell transactions report')
 const columns = [
   { key: 'reference', label: 'Transaction' }, { key: 'customer', label: 'Customer' },
@@ -96,6 +97,12 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString()
 }
 async function loadTransactions() {
+  if (!canViewReport.value) {
+    transactions.value = []
+    error.value = 'You do not have permission to view forex transactions.'
+    loading.value = false
+    return
+  }
   loading.value = true
   error.value = ''
   try {
