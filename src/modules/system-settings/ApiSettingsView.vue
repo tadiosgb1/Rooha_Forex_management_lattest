@@ -12,6 +12,7 @@ const dynamic = computed(() => resource.value === 'settings')
 const config = computed(() => dynamic.value ? {
   title: 'Dynamic Settings',
   description: 'Manage key/value settings persisted by the backend.',
+  defaults: { key: 'vat_rate', value: '15', description: 'Value Added Tax rate percentage applied to transactions', is_active: true },
   fields: [
     { key: 'key', label: 'Setting key', required: true },
     { key: 'value', label: 'Value', required: true },
@@ -25,6 +26,7 @@ const config = computed(() => dynamic.value ? {
 } : {
   title: 'Banks List',
   description: 'Manage bank records used by foreign exchange operations.',
+  defaults: { bank_name: 'Dashen Bank', bank_code: 'DASH', swift_code: 'DASHETAA', settlement_account: '015582150401', currency: 'ETB', status: 'Active', description: 'Leading financial institution in Ethiopia' },
   fields: [
     { key: 'bank_name', label: 'Bank name', required: true },
     { key: 'bank_code', label: 'Bank code', required: true },
@@ -68,7 +70,7 @@ function openForm(row = null) {
   editingId.value = row ? recordId(row) : null
   Object.keys(form).forEach(key => delete form[key])
   config.value.fields.forEach(field => {
-    const value = row?.[field.key]
+    const value = row?.[field.key] ?? config.value.defaults?.[field.key]
     form[field.key] = field.type === 'checkbox'
       ? value === true || value === 'true'
       : value ?? (field.type === 'select' ? field.options[0] : '')
