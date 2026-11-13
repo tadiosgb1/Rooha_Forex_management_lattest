@@ -31,7 +31,7 @@ async function loadBranches() {
   branchError.value = ''
   try {
     const pageSize = 10
-    const firstPage = await apiRequest('branches?page=1&pageSize=10&search=&sortBy=created_at&is_active=true')
+    const firstPage = await apiRequest('branches?page=1&pageSize=10&search=&sortBy=created_at')
     if (firstPage?.status !== 'success' || !Array.isArray(firstPage?.data)) {
       throw new Error(firstPage?.message || 'The server returned an unexpected branches response.')
     }
@@ -39,14 +39,19 @@ async function loadBranches() {
     const allBranches = [...firstPage.data]
     const totalPages = Math.max(1, Number(firstPage.total_pages ?? 1))
     for (let page = 2; page <= totalPages; page += 1) {
-      const response = await apiRequest(`branches?page=${page}&pageSize=${pageSize}&search=&sortBy=created_at&is_active=true`)
+      const response = await apiRequest(`branches?page=${page}&pageSize=${pageSize}&search=&sortBy=created_at`)
       if (response?.status !== 'success' || !Array.isArray(response?.data)) {
         throw new Error(response?.message || `Unable to load branches page ${page}.`)
       }
       allBranches.push(...response.data)
     }
 
-    branches.value = allBranches.filter((branch) => branch?.is_active === true && branch?.id)
+    branches.value = allBranches.filter((branch) => {
+      if (!branch?.id || branch?.is_active === false) return false
+      const status = String(branch?.status ?? '').trim().toUpperCase()
+      if (status) return ['APPROVED', 'ACTIVE'].includes(status)
+      return branch?.is_active === true
+    })
   } catch (error) {
     branchError.value = error?.message || 'Unable to load active branches.'
     branches.value = []
