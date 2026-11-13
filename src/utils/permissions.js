@@ -35,12 +35,12 @@ const MODULE_PERMISSION_MAP = {
   'currency-references': { read: ['reference-currencies:read'], create: ['reference-currencies:create'], update: ['reference-currencies:update'], delete: ['reference-currencies:delete'] },
   rates: { read: ['exchange-rates:read'], create: ['exchange-rates:create'], update: ['exchange-rates:update'], delete: ['exchange-rates:delete'] },
   'service-fees': { read: ['service-fees:read'], create: ['service-fees:create'], update: ['service-fees:update'], delete: ['service-fees:delete'] },
-  trades: { read: ['forex_transactions.view', 'forex_transactions.read'], create: ['forex_transactions.create', 'forex_transactions:create'], update: [], delete: [] },
-  inventory: { read: ['forex_inventory.view'], create: [], update: [], delete: [] },
-  reversals: { read: ['forex_transactions.receipt.view', 'forex_transactions.view', 'forex_transactions.read'], create: ['forex_transactions.reverse'], update: [], delete: [] },
+  trades: { read: ['forex_transactions:view', 'forex_transactions:read'], create: ['forex_transactions:create', 'forex_transactions:create'], update: [], delete: [] },
+  inventory: { read: ['forex_inventory:view'], create: [], update: [], delete: [] },
+  reversals: { read: ['forex_transactions.receipt.view', 'forex_transactions:view', 'forex_transactions:read'], create: ['forex_transactions:reverse'], update: [], delete: [] },
   accounting: { read: ['forex_journal_entries.view'], create: [], update: [], delete: [] },
   compliance: { read: ['forex_transactions.audit.view'], create: [], update: [], delete: [] },
-  'decision-management': { read: ['forex_transactions.read_policy', 'forex_transactions.manage_policy'], create: ['forex_transactions.manage_policy'], update: ['forex_transactions.manage_policy'], delete: [] },
+  'decision-management': { read: ['forex_transactions:read_policy', 'forex_transactions.manage_policy'], create: ['forex_transactions.manage_policy'], update: ['forex_transactions.manage_policy'], delete: [] },
   audit: { read: ['forex_transactions.audit.view'], create: [], update: [], delete: [] },
 }
 
