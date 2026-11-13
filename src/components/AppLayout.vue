@@ -34,7 +34,6 @@ const administrationItems = [
   { label: 'Roles', to: '/roles', icon: '◆', permission: 'roles:read' },
   { label: 'Branches', to: '/branches', icon: '⌖', permission: 'branches:read' },
   { label: 'Permissions', to: '/permissions', icon: '▤', permission: 'permissions:read' },
-  { label: 'Platform Brands', to: '/platform-brands', icon: '◐', permission: 'system-config:read' },
 ]
 const navGroups = [
   { id: 'dashboard', label: 'Dashboard', standalone: true, items: [{ label: 'Dashboard', to: '/', icon: '⌂' }] },
@@ -67,6 +66,7 @@ const navGroups = [
     items: [
       { label: 'Banks List', to: '/system-settings/banks', icon: '▦', permission: 'system-config:read' },
       { label: 'Dynamic Settings', to: '/system-settings/dynamic', icon: '⚙', permission: 'system-config:read' },
+  { label: 'Platform Brands', to: '/platform-brands', icon: '◐', permission: 'system-config:read' },
       // Temporarily hidden from the System Settings menu:
       // { label: 'Fiscal Year', to: '/system-settings/fiscal-year', icon: '◷', permission: 'system-config:read' },
       // { label: 'Permit Number', to: '/system-settings/permit-number', icon: '№', permission: 'system-config:read' },
