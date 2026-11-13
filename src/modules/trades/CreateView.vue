@@ -457,7 +457,7 @@ async function submit() {
         </aside>
       </div>
       <div class="trade-rate-feedback"><p v-if="rateError" class="trade-rate-error" role="alert">{{ rateError }}</p></div>
-      <div class="module-form-footer"><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="returnToRateList">← Back to rates</BaseButton></div><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="openReceiptPreview">Preview receipt</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions.create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
+      <div class="module-form-footer"><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="returnToRateList">← Back to rates</BaseButton></div><div><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="router.push('/trades')">Cancel</BaseButton><BaseButton type="button" variant="secondary" class="module-secondary-btn" @click="openReceiptPreview">Preview receipt</BaseButton><BaseButton v-if="hasAnyPermission(['forex_transactions:create', 'forex_transactions:create'])" type="submit" class="module-primary-btn" :disabled="saving || loading || !selectedRate || rateValue == null">{{ saving ? 'Submitting…' : (form.transaction_type === 'BUY' ? 'Confirm BUY' : 'Confirm SELL') }}</BaseButton></div></div>
     </BaseCard>
   </section>
 </template>
