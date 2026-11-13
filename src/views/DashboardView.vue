@@ -17,7 +17,7 @@ const transactions = ref([])
 const loading = ref(false)
 const error = ref('')
 const dateRange = ref({ preset: '30' })
-const canViewTransactions = computed(() => hasPermission('forex_transactions.view') || hasPermission('forex_transactions.read'))
+const canViewTransactions = computed(() => hasPermission('forex_transactions:view') || hasPermission('forex_transactions:read'))
 function unwrap(response) {
   let value = response
   for (let depth = 0; depth < 5; depth += 1) {
@@ -83,7 +83,7 @@ const visibleSummaries = computed(() => summaries.filter(item => hasModulePermis
 const shortcuts = [
   { label: 'Buy transactions', to: '/transaction-reports/buy', visible: canViewTransactions.value },
   { label: 'Sell transactions', to: '/transaction-reports/sell', visible: canViewTransactions.value },
-  { label: 'New transaction', to: '/trades/new', visible: hasPermission('forex_transactions.create') || hasPermission('forex_transactions:create') },
+  { label: 'New transaction', to: '/trades/new', visible: hasPermission('forex_transactions:create') || hasPermission('forex_transactions:create') },
   { label: 'Exchange rates', to: '/rates/latest', visible: hasModulePermission('rates','read') },
   { label: 'Inventory / FIFO', to: '/inventory', visible: hasModulePermission('inventory','read') },
   { label: 'Users & Roles', to: '/users', visible: hasModulePermission('users','read') },
