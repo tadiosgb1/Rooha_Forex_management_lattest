@@ -57,8 +57,8 @@ const navGroups = [
   {
     id: 'transaction-reports', label: 'Receipt Generator', icon: '▤',
     items: [
-      { label: 'Buy transactions report', to: '/transaction-reports/buy', icon: '↗', permission: ['forex_transactions.view', 'forex_transactions.read'] },
-      { label: 'Sell transactions report', to: '/transaction-reports/sell', icon: '↘', permission: ['forex_transactions.view', 'forex_transactions.read'] },
+      { label: 'Buy transactions report', to: '/transaction-reports/buy', icon: '↗', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+      { label: 'Sell transactions report', to: '/transaction-reports/sell', icon: '↘', permission: ['forex_transactions:view', 'forex_transactions:read'] },
     ],
   },
   {
