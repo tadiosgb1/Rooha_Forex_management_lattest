@@ -76,9 +76,9 @@ const navGroups = [
   {
     id: 'accounting', label: 'Accounting', icon: '▤',
     items: [
-      { label: 'Charts of accounts', to: '/accounting/accounts', icon: '▦', permission: 'forex_journal_entries.view' },
-      { label: 'Journal entry', to: '/accounting/journal', icon: '≡', permission: 'forex_journal_entries.view' },
-      { label: 'Reports', to: '/accounting/reports', icon: '▥', permission: 'forex_journal_entries.view' },
+      { label: 'Charts of accounts', to: '/accounting/accounts', icon: '▦', permission: '' },
+      { label: 'Journal entry', to: '/accounting/journal', icon: '≡', permission: '' },
+      { label: 'Reports', to: '/accounting/reports', icon: '▥', permission: '' },
     ],
   },
 ]
