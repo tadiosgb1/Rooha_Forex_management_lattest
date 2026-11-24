@@ -50,6 +50,8 @@ const navGroups = [
       
       { label: 'All Rates', to: '/rates', icon: '▤', permission: 'exchange-rates:read' },
       { label: 'Daily Rates', to: '/rates/latest', icon: '▦', permission: 'exchange-rates:read' },
+      { label: 'External Rates', to: '/rates/external', icon: '⇄', permission: 'exchange-rates:read' },
+      { label: 'Currency Calculator', to: '/rates/calculator', icon: '⊞', permission: 'exchange-rates:read' },
       { label: 'Reference Currencies', to: '/reference-currencies', icon: '¤', permission: 'reference-currencies:read' },
       { label: 'Service Fee', to: '/service-fees', icon: '%', permission: 'service-fees:read' },
     ],
@@ -174,7 +176,6 @@ function logout() { profileOpen.value = false; appStore.logout(); router.push('/
           </section>
         </template>
       </nav>
-
     </aside>
     <main class="modular-main">
       <header class="modular-topbar">

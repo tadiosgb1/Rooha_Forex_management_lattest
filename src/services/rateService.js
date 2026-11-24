@@ -17,4 +17,10 @@ export const rateService = {
   approve: (id, payload) => apiRequest(`${endpoint}/${encodeURIComponent(id)}/approve`, { method: 'PATCH', body: payload }),
   reject: (id, payload) => apiRequest(`${endpoint}/${encodeURIComponent(id)}/reject`, { method: 'PATCH', body: payload }),
   remove: (id) => apiRequest(`${endpoint}/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
+  // External / Roohaforex reference rates
+  external: () => apiRequest(`${endpoint}/external`),
+  externalLatest: () => apiRequest(`${endpoint}/external/latest`),
+  externalSync: () => apiRequest(`${endpoint}/external/sync`, { method: 'POST' }),
+  externalImport: () => apiRequest(`${endpoint}/external/import`, { method: 'POST' }),
 }
