@@ -45,7 +45,8 @@ const routes = [
   { path: '/system-settings/spread', name: 'settings-spread', component: () => import('../modules/system-settings/SystemSettingsView.vue'), meta: { title: 'Spread Settings', settingKey: 'spread' } },
   { path: '/system-settings/capital-management', name: 'settings-capital-management', component: () => import('../modules/system-settings/SystemSettingsView.vue'), meta: { title: 'Capital Mgt', settingKey: 'capital-management' } },
   { path: '/system-settings', redirect: '/system-settings/banks' },
-  { path: '/cash-management', redirect: '/cash-management/vaults' },
+  { path: '/cash-management', redirect: '/cash-management/my-vaults' },
+  { path: '/cash-management/my-vaults', name: 'cash-management-my-vaults', component: () => import('../modules/cash-management/VaultDashboardView.vue'), meta: { title: 'My Vaults' } },
   { path: '/cash-management/vaults', name: 'cash-management-vaults', component: () => import('../modules/cash-management/CashManagementView.vue'), meta: { title: 'Cash Management · Vaults', cashManagementSection: 'vaults' } },
   { path: '/cash-management/transfers', name: 'cash-management-transfers', component: () => import('../modules/cash-management/CashManagementView.vue'), meta: { title: 'Cash Management · Transfers', cashManagementSection: 'transfers' } },
   { path: '/cash-management/opening-balances', name: 'cash-management-opening-balances', component: () => import('../modules/cash-management/CashManagementView.vue'), meta: { title: 'Cash Management · Opening Balances', cashManagementSection: 'opening-balances' } },
@@ -91,6 +92,7 @@ const routePermissionMap = {
     reversals: ['forex_transactions.receipt.view', 'forex_transactions:view', 'forex_transactions:read'], 'reversals-create': ['forex_transactions:reverse'], 'reversals-edit': [], 'reversals-detail': ['forex_transactions.receipt.view', 'forex_transactions:view'],
     'settings-banks': ['system-config:read', 'system-config:update'], 'settings-dynamic': ['system-config:read', 'system-config:update'], 'settings-fiscal-year': ['system-config:read', 'system-config:update'], 'settings-permit-number': ['system-config:read', 'system-config:update'], 'settings-reversed-pn': ['system-config:read', 'system-config:update'], 'settings-vat': ['system-config:read', 'system-config:update'], 'settings-spread': ['system-config:read', 'system-config:update'], 'settings-capital-management': ['system-config:read', 'system-config:update'],
     'accounting-accounts': [''], 'accounting-journal': [''], 'accounting-reports': [''],
+    'cash-management-my-vaults': [''], 'cash-management-vaults': [''], 'cash-management-transfers': [''], 'cash-management-opening-balances': [''], 'cash-management-reconciliations': [''],
     'platform-brands': ['system-config:read', 'system-config:update'],
   }
 function routePermissions(to) {

@@ -79,7 +79,8 @@ const navGroups = [
   {
     id: 'cash-management', label: 'Cash Management', icon: '💵',
     items: [
-      { label: 'Vaults', to: '/cash-management/vaults', icon: '▣' },
+      { label: 'My Vaults', to: '/cash-management/my-vaults', icon: '🏦' },
+      { label: 'All Vaults', to: '/cash-management/vaults', icon: '▣' },
       { label: 'Transfers', to: '/cash-management/transfers', icon: '⇄' },
       { label: 'Opening Balances', to: '/cash-management/opening-balances', icon: '◷' },
       { label: 'Reconciliations', to: '/cash-management/reconciliations', icon: '≡' },
