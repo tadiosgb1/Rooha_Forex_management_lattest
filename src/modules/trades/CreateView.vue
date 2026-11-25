@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { apiRequest } from '../../services/apiClient'
 import { forexTransactionService } from '../../services/forexTransactionService'
 import { customerService } from '../../services/customerService'
@@ -12,6 +12,7 @@ import { useToast } from '../../composables/toast'
 import { hasAnyPermission } from '../../utils/permissions'
 
 const router = useRouter()
+const route  = useRoute()
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://10.195.49.18:3001').replace(/\/$/, '')
 const toast = useToast()
 const loading = ref(false)
@@ -24,7 +25,7 @@ const serviceFeeError = ref('')
 const countryOpen = ref(false)
 const countrySearch = ref('')
 const rateError = ref('')
-const activeTab = ref('SELL')
+const activeTab = ref(String(route.query.type ?? 'SELL').toUpperCase() === 'BUY' ? 'BUY' : 'SELL')
 const showTradeForm = ref(false)
 const currencyLines = ref([])
 const addCurrencyRateId = ref('')
@@ -46,7 +47,7 @@ const form = reactive({
   sub_city: '',
   wereda: '',
   rate_id: '',
-  transaction_type: 'BUY',
+  transaction_type: String(route.query.type ?? 'SELL').toUpperCase() === 'BUY' ? 'BUY' : 'SELL',
   payment_method: 'CASH',
   service_fee: '0',
   fcy_amount: '',

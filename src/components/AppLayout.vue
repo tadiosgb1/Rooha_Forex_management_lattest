@@ -56,11 +56,19 @@ const navGroups = [
       { label: 'Service Fee', to: '/service-fees', icon: '%', permission: 'service-fees:read' },
     ],
   },
+
   {
-    id: 'transaction-reports', label: 'Receipt Generator', icon: '▤',
+    id: 'transaction-reports', label: 'Receipt Generator', icon: '🧾',
     items: [
-      { label: 'Buy transactions report', to: '/transaction-reports/buy', icon: '↗', permission: ['forex_transactions:view', 'forex_transactions:read'] },
-      { label: 'Sell transactions report', to: '/transaction-reports/sell', icon: '↘', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+      { label: 'Buy receipts', to: '/transaction-reports/buy', icon: '↙', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+      { label: 'Sell receipts', to: '/transaction-reports/sell', icon: '↗', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+    ],
+  },
+  {
+    id: 'transaction-management', label: 'Transaction Management', icon: '⊕',
+    items: [
+      { label: 'Buy Transaction',  to: '/transactions/buy',  icon: '↙', permission: ['forex_transactions:create'] },
+      { label: 'Sell Transaction', to: '/transactions/sell', icon: '↗', permission: ['forex_transactions:create'] },
     ],
   },
   {
