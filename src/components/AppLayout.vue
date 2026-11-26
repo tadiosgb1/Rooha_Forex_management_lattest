@@ -97,11 +97,25 @@ const navGroups = [
     ],
   },
   {
+    id: 'cash-at-bank', label: 'Cash at Bank', icon: '🏦',
+    items: [
+      { label: 'Dashboard',      to: '/bank-accounts/cash-at-bank', icon: '◈' },
+      { label: 'Bank Accounts',  to: '/bank-accounts',             icon: '▤' },
+    ],
+  },
+  {
     id: 'accounting', label: 'Accounting', icon: '▤',
     items: [
       { label: 'Charts of accounts', to: '/accounting/accounts', icon: '▦', permission: '' },
-      { label: 'Journal entry', to: '/accounting/journal', icon: '≡', permission: '' },
-      { label: 'Reports', to: '/accounting/reports', icon: '▥', permission: '' },
+      { label: 'Journal entry',      to: '/accounting/journal',  icon: '≡', permission: '' },
+      { label: 'Reports',            to: '/accounting/reports',  icon: '▥', permission: '' },
+    ],
+  },
+  {
+    id: 'trade-reports', label: 'Transaction Reports', icon: '📊',
+    items: [
+      { label: 'Buy Report',  to: '/accounting/buy-report',  icon: '↙', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+      { label: 'Sell Report', to: '/accounting/sell-report', icon: '↗', permission: ['forex_transactions:view', 'forex_transactions:read'] },
     ],
   },
 ]

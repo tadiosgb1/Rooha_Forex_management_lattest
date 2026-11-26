@@ -15,6 +15,7 @@ import { apiRequest } from '../../services/apiClient'
 import { rateService } from '../../services/rateService'
 import { customerService } from '../../services/customerService'
 import { tradeTransactionService } from '../../services/tradeTransactionService'
+import { bankAccountService } from '../../services/bankAccountService'
 import { useToast } from '../../composables/toast'
 import BaseButton from '../../components/ui/BaseButton.vue'
 
@@ -100,9 +101,7 @@ const tx = reactive({
   fcy_amount:          '',
   purpose:             'Vacation Travel',
   payment_method:      'CASH',
-  bank_id:             '',
-  bank_account_number: '',
-  bank_account_name:   '',
+  bank_account_id:     '',
 })
 const step3Error = ref('')
 
@@ -111,8 +110,7 @@ function validateStep3() {
   if (!tx.rate_id)                                   { step3Error.value = 'Please select a currency.'; return false }
   if (!tx.fcy_amount || Number(tx.fcy_amount) <= 0)  { step3Error.value = 'Enter a valid amount.';    return false }
   if (tx.payment_method === 'BANK') {
-    if (!tx.bank_id)                   { step3Error.value = 'Select a bank.';          return false }
-    if (!tx.bank_account_number.trim()){ step3Error.value = 'Enter the account number.'; return false }
+    if (!tx.bank_account_id) { step3Error.value = 'Select a bank account.'; return false }
   }
   return true
 }
@@ -140,7 +138,7 @@ const etbAmount = computed(() => {
   const a = Number(tx.fcy_amount)
   return sellRate.value && Number.isFinite(a) && a > 0 ? a * sellRate.value : null
 })
-const selectedBank = computed(() => banks.value.find(b => String(b.id) === String(tx.bank_id)) ?? null)
+const selectedBankAccount = computed(() => banks.value.find(b => String(b.id) === String(tx.bank_account_id)) ?? null)
 
 function fmt(v) {
   const n = Number(v)
@@ -252,9 +250,7 @@ async function submit() {
       travel_date:           travel.travel_date                  || undefined,
       // bank fields — only when BANK
       ...(tx.payment_method === 'BANK' ? {
-        bank_id:             tx.bank_id,
-        bank_account_number: tx.bank_account_number.trim(),
-        bank_account_name:   tx.bank_account_name.trim() || undefined,
+        bank_account_id: tx.bank_account_id,
       } : {}),
     }
 
@@ -276,7 +272,7 @@ onMounted(async () => {
     const [rateRes, idRes, bankRes] = await Promise.allSettled([
       rateService.latest(),
       apiRequest('reference-id-types'),
-      apiRequest('banks'),
+      bankAccountService.list(),
     ])
 
     if (rateRes.status === 'fulfilled') {
@@ -520,22 +516,16 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- bank fields — only when BANK -->
+          <!-- bank account dropdown — only when BANK -->
           <div v-if="tx.rate_id && tx.payment_method === 'BANK'" class="wiz-grid">
-            <div class="wiz-field">
-              <label>Bank *</label>
-              <select v-model="tx.bank_id" class="wiz-input">
-                <option value="">Select bank</option>
-                <option v-for="b in banks" :key="b.id" :value="b.id">{{ b.bank_name ?? b.name }}</option>
+            <div class="wiz-field" style="grid-column:1/-1">
+              <label>Bureau Bank Account *</label>
+              <select v-model="tx.bank_account_id" class="wiz-input">
+                <option value="">Select bank account</option>
+                <option v-for="b in banks" :key="b.id" :value="b.id">
+                  {{ b.bank?.bank_name ?? b.bank_name ?? 'Bank' }} — {{ b.account_number }} ({{ b.account_name }})
+                </option>
               </select>
-            </div>
-            <div class="wiz-field">
-              <label>Account number *</label>
-              <input v-model="tx.bank_account_number" class="wiz-input" placeholder="e.g. 1000347815" />
-            </div>
-            <div class="wiz-field">
-              <label>Account holder name</label>
-              <input v-model="tx.bank_account_name" class="wiz-input" placeholder="Name on deposit slip" />
             </div>
           </div>
 
@@ -600,9 +590,8 @@ onMounted(async () => {
                 <div class="wiz-review-row"><span>SELL Rate</span><strong>{{ fmt(sellRate) }} ETB</strong></div>
                 <div class="wiz-review-row"><span>Purpose</span><strong>{{ tx.purpose }}</strong></div>
                 <template v-if="tx.payment_method === 'BANK'">
-                  <div class="wiz-review-row"><span>Bank</span><strong>{{ selectedBank?.bank_name ?? selectedBank?.name ?? '—' }}</strong></div>
-                  <div class="wiz-review-row"><span>Account No.</span><strong>{{ tx.bank_account_number || '—' }}</strong></div>
-                  <div class="wiz-review-row" v-if="tx.bank_account_name"><span>Account Name</span><strong>{{ tx.bank_account_name }}</strong></div>
+                  <div class="wiz-review-row"><span>Bank Account</span><strong>{{ selectedBankAccount?.account_name ?? '—' }}</strong></div>
+                  <div class="wiz-review-row"><span>Account No.</span><strong>{{ selectedBankAccount?.account_number ?? '—' }}</strong></div>
                 </template>
                 <div class="wiz-review-row wiz-review-total"><span>Total Amount</span><strong>{{ fmt(etbAmount) }} ETB</strong></div>
               </div>
