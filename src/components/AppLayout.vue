@@ -74,16 +74,11 @@ const navGroups = [
   {
     id: 'system-settings', label: 'System Settings', icon: '⚙',
     items: [
-      { label: 'Banks List', to: '/system-settings/banks', icon: '▦', permission: 'system-config:read' },
-      { label: 'Dynamic Settings', to: '/system-settings/dynamic', icon: '⚙', permission: 'system-config:read' },
-  { label: 'Platform Brands', to: '/platform-brands', icon: '◐', permission: 'system-config:read' },
-      // Temporarily hidden from the System Settings menu:
-      // { label: 'Fiscal Year', to: '/system-settings/fiscal-year', icon: '◷', permission: 'system-config:read' },
-      // { label: 'Permit Number', to: '/system-settings/permit-number', icon: '№', permission: 'system-config:read' },
-      // { label: 'Reversed PN', to: '/system-settings/reversed-pn', icon: '↶', permission: 'system-config:read' },
-      // { label: 'VAT Settings', to: '/system-settings/vat', icon: '%', permission: 'system-config:read' },
-      // { label: 'Spread Settings', to: '/system-settings/spread', icon: '⇄', permission: 'system-config:read' },
-      // { label: 'Capital Mgt', to: '/system-settings/capital-management', icon: '◈', permission: 'system-config:read' },
+      { label: 'Banks List',         to: '/system-settings/banks',    icon: '▦', permission: 'system-config:read' },
+      { label: 'Dynamic Settings',   to: '/system-settings/dynamic',  icon: '⚙', permission: 'system-config:read' },
+      { label: 'Platform Brands',    to: '/platform-brands',          icon: '◐', permission: 'system-config:read' },
+      { label: 'Reference ID Types', to: '/reference-id-types',       icon: '🪪' },
+      { label: 'Bank Accounts',      to: '/bank-accounts',            icon: '🏦' },
     ],
   },
   {
@@ -96,13 +91,7 @@ const navGroups = [
       { label: 'Reconciliations', to: '/cash-management/reconciliations', icon: '≡' },
     ],
   },
-  {
-    id: 'cash-at-bank', label: 'Cash at Bank', icon: '🏦',
-    items: [
-      { label: 'Dashboard',      to: '/bank-accounts/cash-at-bank', icon: '◈' },
-      { label: 'Bank Accounts',  to: '/bank-accounts',             icon: '▤' },
-    ],
-  },
+
   {
     id: 'accounting', label: 'Accounting', icon: '▤',
     items: [
