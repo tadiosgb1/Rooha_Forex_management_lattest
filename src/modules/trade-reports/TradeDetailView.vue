@@ -17,6 +17,38 @@ const id     = computed(() => route.params.id)
 const tx      = ref(null)
 const loading = ref(false)
 const error   = ref('')
+const saving  = ref(false)
+
+// reject modal
+const rejectModal  = ref(false)
+const rejectReason = ref('')
+
+import { useToast } from '../../composables/toast'
+const toast = useToast()
+
+async function approve() {
+  if (!confirm('Approve this transaction? This will update teller till and bank balances.')) return
+  saving.value = true
+  try {
+    await tradeTransactionService.approve(id.value)
+    toast.success('Transaction approved successfully.')
+    await load()
+  } catch (e) { toast.error(e?.message || 'Approve failed.') }
+  finally { saving.value = false }
+}
+
+async function submitReject() {
+  if (!rejectReason.value.trim()) return
+  saving.value = true
+  try {
+    await tradeTransactionService.reject(id.value, rejectReason.value.trim())
+    toast.success('Transaction rejected.')
+    rejectModal.value = false
+    rejectReason.value = ''
+    await load()
+  } catch (e) { toast.error(e?.message || 'Reject failed.') }
+  finally { saving.value = false }
+}
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function fmt(v) {
@@ -77,9 +109,30 @@ onMounted(load)
             {{ isBuy ? 'Purchase of Foreign Cash Notes' : 'Sales of Foreign Cash Notes' }}
           </h2>
         </div>
-        <BaseBadge :tone="statusTone(tx.status)" class="td-status-badge">
-          {{ tx.status }}
-        </BaseBadge>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <BaseBadge :tone="statusTone(tx.status)" class="td-status-badge">
+            {{ tx.status }}
+          </BaseBadge>
+          <!-- approve / reject — only shown for PENDING -->
+          <template v-if="tx.status === 'PENDING'">
+            <BaseButton
+              size="sm"
+              style="background:#168a7b;color:#fff"
+              :disabled="saving"
+              @click="approve"
+            >
+              {{ saving ? '…' : '✓ Approve' }}
+            </BaseButton>
+            <BaseButton
+              variant="danger"
+              size="sm"
+              :disabled="saving"
+              @click="rejectModal = true"
+            >
+              ✕ Reject
+            </BaseButton>
+          </template>
+        </div>
       </div>
     </div>
 
@@ -205,6 +258,26 @@ onMounted(load)
       </div>
     </template>
 
+    <!-- reject modal -->
+    <Teleport to="body">
+      <div v-if="rejectModal" class="td-modal-backdrop" @click.self="rejectModal = false">
+        <div class="td-modal">
+          <h3>Reject Transaction</h3>
+          <p>Provide a clear reason for rejecting this transaction.</p>
+          <div class="td-modal-field">
+            <label>Reason *</label>
+            <textarea v-model="rejectReason" class="td-modal-input" rows="4" placeholder="e.g. Customer documentation is incomplete…"></textarea>
+          </div>
+          <div class="td-modal-actions">
+            <BaseButton variant="secondary" @click="rejectModal = false">Cancel</BaseButton>
+            <BaseButton variant="danger" :disabled="saving || !rejectReason.trim()" @click="submitReject">
+              {{ saving ? 'Submitting…' : 'Confirm Reject' }}
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </section>
 </template>
 
@@ -268,3 +341,14 @@ onMounted(load)
   .td-meta-item:last-child { border-bottom: none; }
 }
 </style>
+
+/* reject modal */
+.td-modal-backdrop { position: fixed; inset: 0; background: rgba(7,24,39,.55); display: grid; place-items: center; z-index: 50; padding: 20px; }
+.td-modal { background: #fff; border-radius: 14px; padding: 28px; width: min(440px,100%); display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
+.td-modal h3 { font-size: 18px; margin: 0; }
+.td-modal p  { margin: 0; font-size: 13px; color: #718096; }
+.td-modal-field { display: flex; flex-direction: column; gap: 6px; }
+.td-modal-field label { font-size: 12px; font-weight: 700; color: #4b5f76; }
+.td-modal-input { padding: 9px 11px; border: 1px solid #dce5ee; border-radius: 8px; font: inherit; font-size: 14px; background: #fff; color: #203750; width: 100%; box-sizing: border-box; resize: vertical; }
+.td-modal-input:focus { outline: none; border-color: #c0392b; }
+.td-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }

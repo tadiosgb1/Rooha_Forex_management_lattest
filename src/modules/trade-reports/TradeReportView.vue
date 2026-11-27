@@ -6,6 +6,7 @@ import { hasAnyPermission } from '../../utils/permissions'
 import BaseButton from '../../components/ui/BaseButton.vue'
 import BaseBadge from '../../components/ui/BaseBadge.vue'
 import BaseCard from '../../components/ui/BaseCard.vue'
+import { useToast } from '../../composables/toast'
 
 const props  = defineProps({ transactionType: { type: String, required: true } })
 const router = useRouter()
@@ -123,7 +124,42 @@ async function load() {
   }
 }
 
-watch([period, status], () => { page.value = 1; load() })
+const toast = useToast()
+
+// ─── approve / reject ─────────────────────────────────────────────────────────
+const actionId     = ref(null)
+const rejectModal  = ref(false)
+const rejectTarget = ref(null)
+const rejectReason = ref('')
+
+async function approveRow(row) {
+  if (!confirm(`Approve transaction for ${row.customer_fullname ?? 'this customer'}?`)) return
+  actionId.value = row.id
+  try {
+    await tradeTransactionService.approve(row.id)
+    toast.success('Transaction approved.')
+    await load()
+  } catch (e) { toast.error(e?.message || 'Approve failed.') }
+  finally { actionId.value = null }
+}
+
+function openReject(row) {
+  rejectTarget.value = row
+  rejectReason.value = ''
+  rejectModal.value  = true
+}
+
+async function submitReject() {
+  if (!rejectReason.value.trim() || !rejectTarget.value) return
+  actionId.value = rejectTarget.value.id
+  try {
+    await tradeTransactionService.reject(rejectTarget.value.id, rejectReason.value.trim())
+    toast.success('Transaction rejected.')
+    rejectModal.value = false
+    await load()
+  } catch (e) { toast.error(e?.message || 'Reject failed.') }
+  finally { actionId.value = null }
+}
 watch(page, load)
 onMounted(load)
 </script>
@@ -260,12 +296,30 @@ onMounted(load)
               </td>
               <td style="white-space:nowrap">{{ fmtDate(r.created_at) }}</td>
               <td>
-                <button
-                  class="tr-view-btn"
-                  @click="router.push(`/trade-reports/detail/${encodeURIComponent(r.id)}`)"
-                >
-                  View
-                </button>
+                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                  <button
+                    class="tr-view-btn"
+                    @click="router.push(`/trade-reports/detail/${encodeURIComponent(r.id)}`)"
+                  >
+                    View
+                  </button>
+                  <button
+                    v-if="r.status === 'PENDING'"
+                    class="tr-view-btn tr-approve-btn"
+                    :disabled="actionId === r.id"
+                    @click="approveRow(r)"
+                  >
+                    ✓ Approve
+                  </button>
+                  <button
+                    v-if="r.status === 'PENDING'"
+                    class="tr-view-btn tr-reject-btn"
+                    :disabled="actionId === r.id"
+                    @click="openReject(r)"
+                  >
+                    ✕ Reject
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
