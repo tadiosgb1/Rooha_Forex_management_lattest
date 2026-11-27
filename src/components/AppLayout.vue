@@ -71,16 +71,14 @@ const navGroups = [
       { label: 'Sell Transaction', to: '/transactions/sell', icon: '↗', permission: ['forex_transactions:create'] },
     ],
   },
-  {
-    id: 'system-settings', label: 'System Settings', icon: '⚙',
+   {
+    id: 'trade-reports', label: 'Transaction Reports', icon: '📊',
     items: [
-      { label: 'Banks List',         to: '/system-settings/banks',    icon: '▦', permission: 'system-config:read' },
-      { label: 'Dynamic Settings',   to: '/system-settings/dynamic',  icon: '⚙', permission: 'system-config:read' },
-      { label: 'Platform Brands',    to: '/platform-brands',          icon: '◐', permission: 'system-config:read' },
-      { label: 'Reference ID Types', to: '/reference-id-types',       icon: '🪪' },
-      { label: 'Bank Accounts',      to: '/bank-accounts',            icon: '🏦' },
+      { label: 'Buy Report',  to: '/accounting/buy-report',  icon: '↙', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+      { label: 'Sell Report', to: '/accounting/sell-report', icon: '↗', permission: ['forex_transactions:view', 'forex_transactions:read'] },
     ],
   },
+  
   {
     id: 'cash-management', label: 'Cash Management', icon: '💵',
     items: [
@@ -101,12 +99,16 @@ const navGroups = [
     ],
   },
   {
-    id: 'trade-reports', label: 'Transaction Reports', icon: '📊',
+    id: 'system-settings', label: 'System Settings', icon: '⚙',
     items: [
-      { label: 'Buy Report',  to: '/accounting/buy-report',  icon: '↙', permission: ['forex_transactions:view', 'forex_transactions:read'] },
-      { label: 'Sell Report', to: '/accounting/sell-report', icon: '↗', permission: ['forex_transactions:view', 'forex_transactions:read'] },
+      { label: 'Banks List',         to: '/system-settings/banks',    icon: '▦', permission: 'system-config:read' },
+      { label: 'Dynamic Settings',   to: '/system-settings/dynamic',  icon: '⚙', permission: 'system-config:read' },
+      { label: 'Platform Brands',    to: '/platform-brands',          icon: '◐', permission: 'system-config:read' },
+      { label: 'Reference ID Types', to: '/reference-id-types',       icon: '🪪' },
+      { label: 'Bank Accounts',      to: '/bank-accounts',            icon: '🏦' },
     ],
   },
+ 
 ]
 function canAccess(item) {
   const required = item.permission

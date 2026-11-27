@@ -341,6 +341,26 @@ onMounted(load)
       </div>
     </BaseCard>
 
+    <!-- reject modal -->
+    <Teleport to="body">
+      <div v-if="rejectModal" class="tr-modal-backdrop" @click.self="rejectModal = false">
+        <div class="tr-modal">
+          <h3>Reject Transaction</h3>
+          <p v-if="rejectTarget">Customer: <strong>{{ rejectTarget.customer_fullname ?? '—' }}</strong></p>
+          <div class="tr-modal-field">
+            <label>Reason *</label>
+            <textarea v-model="rejectReason" class="tr-modal-input" rows="4" placeholder="e.g. Customer documentation is incomplete…"></textarea>
+          </div>
+          <div class="tr-modal-actions">
+            <BaseButton variant="secondary" @click="rejectModal = false">Cancel</BaseButton>
+            <BaseButton variant="danger" :disabled="!rejectReason.trim()" @click="submitReject">
+              Confirm Reject
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </section>
 </template>
 
@@ -384,6 +404,22 @@ onMounted(load)
   color: #167d72; font-size: 11px; font-weight: 700; padding: 5px 7px; cursor: pointer;
 }
 .tr-view-btn:hover { color: #0f5a52; }
+.tr-approve-btn { color: #167d72; }
+.tr-approve-btn:hover { color: #0f5a52; }
+.tr-reject-btn  { color: #b43f4a; }
+.tr-reject-btn:hover { color: #8c2d35; }
+.tr-view-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* reject modal */
+.tr-modal-backdrop { position: fixed; inset: 0; background: rgba(7,24,39,.55); display: grid; place-items: center; z-index: 50; padding: 20px; }
+.tr-modal { background: #fff; border-radius: 14px; padding: 28px; width: min(440px,100%); display: flex; flex-direction: column; gap: 16px; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
+.tr-modal h3 { font-size: 18px; margin: 0; }
+.tr-modal p  { margin: 0; font-size: 13px; color: #718096; }
+.tr-modal-field { display: flex; flex-direction: column; gap: 6px; }
+.tr-modal-field label { font-size: 12px; font-weight: 700; color: #4b5f76; }
+.tr-modal-input { padding: 9px 11px; border: 1px solid #dce5ee; border-radius: 8px; font: inherit; font-size: 14px; background: #fff; color: #203750; width: 100%; box-sizing: border-box; resize: vertical; }
+.tr-modal-input:focus { outline: none; border-color: #c0392b; }
+.tr-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 /* footer pagination */
 .tr-pagination { display: flex; align-items: center; gap: 8px; }
