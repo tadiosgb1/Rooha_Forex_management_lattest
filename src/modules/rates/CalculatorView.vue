@@ -176,7 +176,7 @@ onMounted(loadRates)
               @click="transactionType = 'sell'"
             >
               <span class="calc-type-icon">↑</span>
-              <span>I want to sell</span>
+              <span>I want to Buy</span>
             </button>
             <button
               type="button"
@@ -184,7 +184,7 @@ onMounted(loadRates)
               @click="transactionType = 'buy'"
             >
               <span class="calc-type-icon">↓</span>
-              <span>I want to buy</span>
+              <span>I want to Sell</span>
             </button>
           </div>
         </div>
