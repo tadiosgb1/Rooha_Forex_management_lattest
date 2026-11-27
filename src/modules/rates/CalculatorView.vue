@@ -20,7 +20,7 @@ async function loadRates() {
     const value = res?.data ?? res
     rates.value = Array.isArray(value) ? value : Array.isArray(value?.data) ? value.data : []
   } catch (err) {
-    errorMessage.value = err?.message || 'Unable to load exchange rates.'
+    errorMessage.value = err?.message || 'Unable to load Rooha Forex exchange rates.'
   } finally {
     loading.value = false
   }
@@ -49,8 +49,8 @@ const calc = computed(() => {
   const buyRate = Number(activeRate.value.buy_rate)
   const sellRate = Number(activeRate.value.sell_rate)
 
-  // transactionType = 'sell' → customer sells foreign → bureau buys → use buy_rate
-  // transactionType = 'buy'  → customer buys foreign → bureau sells → use sell_rate
+  // transactionType = 'sell' → customer sells foreign → Rooha Forex buys → use buy_rate
+  // transactionType = 'buy'  → customer buys foreign → Rooha Forex sells → use sell_rate
   const isFromForeign = fromCurrency.value !== ETB
   const rate = transactionType.value === 'sell'
     ? (isFromForeign ? buyRate : sellRate)
@@ -100,12 +100,16 @@ onMounted(loadRates)
 </script>
 
 <template>
-  <section class="module-page calc-page">
+  <section class="module-page calc-page rooha-forex">
     <!-- Page header -->
     <div class="module-page-intro">
       <div>
-        <h2>Currency Calculator</h2>
-        <p class="module-description">Calculate exchange rates instantly. Get transparent pricing for your currency transactions based on today's live rates.</p>
+        <div class="rooha-brand-badge">
+          <span class="rooha-brand-mark">RF</span>
+          <span class="rooha-brand-name">Rooha Forex</span>
+        </div>
+        <h2>Rooha Forex Currency Calculator</h2>
+        <p class="module-description">Calculate exchange rates instantly with Rooha Forex. Transparent pricing for your currency transactions based on today's live rates.</p>
       </div>
       <button class="calc-refresh-btn" @click="loadRates" :disabled="loading">
         {{ loading ? 'Loading…' : '↻ Refresh rates' }}
@@ -120,7 +124,7 @@ onMounted(loadRates)
     <div class="calc-layout">
       <!-- ── INPUT CARD ───────────────────────────────────────── -->
       <div class="calc-card calc-inputs-card">
-        <div class="calc-card-title">Exchange Calculator</div>
+        <div class="calc-card-title">Rooha Forex Exchange Calculator</div>
 
         <!-- Amount -->
         <div class="calc-field-group">
@@ -194,9 +198,9 @@ onMounted(loadRates)
 
       <!-- ── RESULT CARD ──────────────────────────────────────── -->
       <div class="calc-card calc-result-card">
-        <div class="calc-card-title">Conversion Result</div>
+        <div class="calc-card-title">Rooha Forex Conversion Result</div>
 
-        <div v-if="loading" class="calc-state">Loading live rates…</div>
+        <div v-if="loading" class="calc-state">Loading live Rooha Forex rates…</div>
         <div v-else-if="!activeRate" class="calc-state">No active rate found for this currency pair.</div>
 
         <template v-else-if="calc">
@@ -213,7 +217,7 @@ onMounted(loadRates)
 
           <!-- Details table -->
           <div class="calc-details">
-            <div class="calc-details-heading">Transaction Details</div>
+            <div class="calc-details-heading">Rooha Forex Transaction Details</div>
             <div class="calc-detail-row">
               <span>Amount</span>
               <strong>{{ fmt(calc.amount) }} {{ calc.fromCode }}</strong>
@@ -249,7 +253,7 @@ onMounted(loadRates)
 
       <!-- ── RATES REFERENCE TABLE ───────────────────────────── -->
       <div class="calc-card calc-rates-ref-card">
-        <div class="calc-card-title">Today's Live Rates</div>
+        <div class="calc-card-title">Today's Live Rooha Forex Rates</div>
         <div v-if="loading" class="calc-state">Loading…</div>
         <div v-else-if="!rates.length" class="calc-state">No rates available.</div>
         <table v-else class="calc-rates-table">
@@ -295,7 +299,47 @@ onMounted(loadRates)
 </template>
 
 <style scoped>
-.calc-page { max-width: 1100px; }
+.calc-page {
+  max-width: 1100px;
+  --brand-primary: #0f766e;
+  --brand-primary-dark: #115e59;
+  --brand-soft-bg: #f0fdfa;
+  --brand-hero-bg: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 100%);
+  --brand-row-active: #ccfbf1;
+}
+
+.rooha-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  background: var(--brand-soft-bg);
+  border: 1px solid #99f6e4;
+  margin-bottom: 8px;
+}
+
+.rooha-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--brand-primary);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.rooha-brand-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--brand-primary-dark);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
 
 .calc-refresh-btn {
   padding: 8px 18px;
@@ -307,7 +351,11 @@ onMounted(loadRates)
   cursor: pointer;
   white-space: nowrap;
 }
-.calc-refresh-btn:hover:not(:disabled) { background: var(--surface-secondary, #f4f6fb); }
+.calc-refresh-btn:hover:not(:disabled) {
+  background: var(--brand-soft-bg);
+  color: var(--brand-primary-dark);
+  border-color: #5eead4;
+}
 
 /* Layout */
 .calc-layout {
@@ -333,7 +381,7 @@ onMounted(loadRates)
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;
-  color: var(--text-muted, #778196);
+  color: var(--brand-primary-dark);
   margin-bottom: 20px;
 }
 
@@ -349,12 +397,15 @@ onMounted(loadRates)
   overflow: hidden;
   background: var(--surface-primary, #fff);
 }
+.calc-amount-wrap:focus-within {
+  border-color: var(--brand-primary);
+}
 .calc-amount-prefix {
   padding: 0 14px;
   font-size: .88rem;
   font-weight: 700;
-  color: var(--text-primary, #263449);
-  background: var(--surface-secondary, #f4f6fb);
+  color: var(--brand-primary-dark);
+  background: var(--brand-soft-bg);
   border-right: 1px solid var(--border, #d1d9e6);
   height: 44px;
   display: flex;
@@ -385,6 +436,10 @@ onMounted(loadRates)
   color: var(--text-primary, #263449);
   background: var(--surface-primary, #fff);
 }
+.calc-select:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+}
 .calc-swap-btn {
   width: 38px;
   height: 42px;
@@ -396,7 +451,11 @@ onMounted(loadRates)
   flex-shrink: 0;
   color: var(--text-primary, #263449);
 }
-.calc-swap-btn:hover { background: var(--primary, #3b6fe0); color: #fff; border-color: var(--primary, #3b6fe0); }
+.calc-swap-btn:hover {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary);
+}
 
 /* Transaction type */
 .calc-type-toggle { display: flex; gap: 10px; }
@@ -416,8 +475,8 @@ onMounted(loadRates)
   transition: all .15s;
 }
 .calc-type-btn.active {
-  background: var(--primary, #3b6fe0);
-  border-color: var(--primary, #3b6fe0);
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
   color: #fff;
   font-weight: 600;
 }
@@ -440,13 +499,14 @@ onMounted(loadRates)
 .calc-result-hero {
   text-align: center;
   padding: 28px 20px;
-  background: linear-gradient(135deg, #f0f5ff 0%, #e8f2ff 100%);
+  background: var(--brand-hero-bg);
+  border: 1px solid #ccfbf1;
   border-radius: 10px;
   margin-bottom: 24px;
 }
 .calc-result-from { font-size: 1rem; color: var(--text-muted, #778196); margin-bottom: 4px; }
 .calc-result-equals { font-size: 1.4rem; color: var(--text-muted, #778196); margin: 4px 0; }
-.calc-result-to { font-size: 2rem; font-weight: 800; color: var(--primary, #3b6fe0); line-height: 1.1; }
+.calc-result-to { font-size: 2rem; font-weight: 800; color: var(--brand-primary); line-height: 1.1; }
 .calc-result-rate { margin-top: 10px; font-size: .82rem; color: var(--text-muted, #778196); }
 
 /* Details */
@@ -470,11 +530,11 @@ onMounted(loadRates)
 .calc-detail-row span { color: var(--text-muted, #778196); }
 .calc-detail-row strong { color: var(--text-primary, #263449); font-weight: 600; }
 .calc-detail-total {
-  background: var(--surface-secondary, #f4f6fb);
+  background: var(--brand-soft-bg);
   border-bottom: none;
 }
 .calc-detail-total span { font-weight: 700; color: var(--text-primary, #263449); }
-.calc-detail-total strong { color: var(--primary, #3b6fe0); font-size: .95rem; }
+.calc-detail-total strong { color: var(--brand-primary-dark); font-size: .95rem; }
 
 /* Rates reference table */
 .calc-rates-table { width: 100%; border-collapse: collapse; }
@@ -489,7 +549,7 @@ onMounted(loadRates)
   border-bottom: 2px solid var(--border, #e3e8f0);
 }
 .calc-rates-table td { padding: 10px 14px; border-bottom: 1px solid var(--border, #edf0f5); font-size: .84rem; }
-.calc-rates-row-active td { background: #eef3ff; }
+.calc-rates-row-active td { background: var(--brand-row-active); }
 .calc-rate-currency { display: flex; align-items: center; gap: 10px; }
 .calc-flag { width: 32px; height: 22px; border-radius: 4px; object-fit: cover; border: 1px solid #e3e8f0; }
 .calc-flag-placeholder { width: 32px; height: 22px; border-radius: 4px; background: #e3e8f0; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; color: #778196; }
